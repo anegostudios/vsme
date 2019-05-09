@@ -4,6 +4,7 @@ import gtk.EventBox;
 import bindbc.opengl;
 import gdk.GLContext : GLContext;
 import gtk.ApplicationWindow;
+import config;
 
 public:
 
@@ -46,7 +47,9 @@ public:
 
         // Present it
         viewport.addOnRender((context, area) {
-            glClearColor(0f, 0f, 0f, 0f);
+            glClearColor(CONFIG.backgroundColor[0], CONFIG.backgroundColor[1], CONFIG.backgroundColor[2], 1f);
+            glClear(GL_COLOR_BUFFER_BIT);
+            glClear(GL_DEPTH_BUFFER_BIT);
             return renderFuncPtr(context, area);
         });
     }
