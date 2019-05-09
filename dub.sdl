@@ -1,0 +1,8 @@
+name "vsme"
+description "A model editor for Vintage Story"
+authors "clipsey"
+copyright "Copyright © 2019, clipsey"
+license "BSL-1.0"
+dependency "bindbc-opengl" version="~>0.8.0"
+dependency "gtk-d" version="~>3.8.5"
+dependency "asdf" version="~>0.4.6"

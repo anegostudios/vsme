@@ -1,0 +1,9 @@
+{
+	"fileVersion": 1,
+	"versions": {
+		"asdf": "0.4.6",
+		"bindbc-loader": "0.2.1",
+		"bindbc-opengl": "0.8.0",
+		"gtk-d": "3.8.5"
+	}
+}
