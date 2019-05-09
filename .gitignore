@@ -1,0 +1,16 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/vsme
+vsme.so
+vsme.dylib
+vsme.dll
+vsme.a
+vsme.lib
+vsme-test-*
+*.exe
+*.o
+*.obj
+*.lst
+vsme
