@@ -3,6 +3,7 @@ import asdf;
 
 public:
 
+/// Output JSON shape that vintage story can read
 struct JShape {
 public:
     /// The textures this shape has access to
@@ -17,6 +18,7 @@ public:
     }
 }
 
+/// Output JSON element that vintage story can read
 struct JElement {
 public:
     /// Name of the element
@@ -47,6 +49,7 @@ public:
     int tintIndex;
 }
 
+/// Output JSON face that vintage story can read
 struct JFace {
 public:
     /// The texture to be applied to the face

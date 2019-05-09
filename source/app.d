@@ -1,6 +1,11 @@
 import std.stdio;
+import gtk.ApplicationWindow;
+import gtk.Application;
+import editor;
 
-void main()
+int main(string[] args)
 {
-	writeln("Currently, this does nothing. Come back later :)");
+	auto app = new Application("com.anegostudios.vsme", GApplicationFlags.FLAGS_NONE);
+	app.addOnActivate((GioApplication appx) { new EditorWindow(app); });
+	return app.run(args);
 }
