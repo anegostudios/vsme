@@ -1,25 +1,13 @@
 module editor;
 import gtk.ApplicationWindow;
 import gtk.Application;
-import gtk.HeaderBar;
+import components.headerbar;
+import components.glviewport;
 
 enum VSME_TITLE = "VSME (Vintage Story Model Editor)";
-
-class EditorHeaderBar : HeaderBar {
-public:
-    this(string title) {
-        super();
-
-        this.setShowCloseButton(true);
-        this.setTitle(title);
-        this.setSubtitle("Idle...");
-
-        this.showAll();
-    }
-}
-
 class EditorWindow : ApplicationWindow {
 public:
+    EditorViewport viewport;
     EditorHeaderBar headerBar;
 
     this(Application app) {
@@ -30,6 +18,11 @@ public:
 
         // Set title, titlebar and show the window
         this.setTitlebar(headerBar);
+
+        viewport = new EditorViewport(this, (context, area) {
+            return false;
+        });
+        this.add(viewport);
         this.showAll();
     }
 }
