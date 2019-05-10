@@ -9,17 +9,15 @@ import config;
 public:
 
 class EditorViewport : EventBox {
-private:
+protected:
     GLArea viewport;
-    bool delegate(GLContext context, GLArea area) renderFuncPtr;
 
 public:
     ref GLArea getViewport() {
         return viewport;
     }
 
-    this(ApplicationWindow root, bool delegate(GLContext context, GLArea area) renderFunc) {
-        renderFuncPtr = renderFunc;
+    this() {
         viewport = new GLArea();
         viewport.addOnRealize((widget) {
             viewport.setDoubleBuffered(true);
@@ -28,12 +26,13 @@ public:
 
             viewport.makeCurrent();
             initGL();
+            init();
         });
         this.add(viewport);
         this.showAll();
     }
 
-    void initGL() {
+    final void initGL() {
         /// Load OpenGL
         auto support = loadOpenGL();
         if (support < GLSupport.gl32) {
@@ -48,11 +47,14 @@ public:
         // Present it
         viewport.addOnRender((context, area) {
             glClearColor(CONFIG.backgroundColor[0], CONFIG.backgroundColor[1], CONFIG.backgroundColor[2], 1f);
-            glClear(GL_COLOR_BUFFER_BIT);
-            glClear(GL_DEPTH_BUFFER_BIT);
-            return renderFuncPtr(context, area);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            return draw(context, area);
         });
     }
+
+    abstract void init();
+
+    abstract bool draw(GLContext context, GLArea area);
 }
 
 /// Unload OpenGL on application quit.
