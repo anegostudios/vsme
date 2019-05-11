@@ -33,7 +33,7 @@ public:
 
         this.setShowCloseButton(true);
         this.setTitle(title);
-        this.setSubtitle("Idle...");
+        this.setSubtitle("No Projects Open");
 
         this.showAll();
     }
@@ -97,7 +97,7 @@ public:
         saveButton.setFocusOnClick(false);
         Image saveButtonHBG = new Image("document-save-symbolic", IconSize.MENU);
         saveButton.add(saveButtonHBG);
-        
+
         this.packStart(saveButton);
     }
 }

@@ -1,7 +1,16 @@
 module scene.node;
 public import math;
 
+enum NodeTypes : ubyte {
+    CORRUPT_NODE = 0,
+    ElementNode = 1,
+    
+
+}
+
 class Node {
+    ubyte typeId;
+
     /// Wether this node is visible in the viewport
     bool visible;
 
@@ -36,7 +45,5 @@ class Node {
     abstract void render();
 
     /// Virtual post-rendering function
-    void postRender() {
-
-    }
+    void postRender();
 }

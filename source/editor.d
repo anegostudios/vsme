@@ -4,6 +4,7 @@ import gtk.Application;
 import components.headerbar;
 import viewports.modelview;
 import gtk.CssProvider;
+import config;
 
 struct Vector3 {
     float x;
@@ -13,6 +14,10 @@ struct Vector3 {
 
 enum VSME_TITLE = "VSME (Vintage Story Model Editor)";
 class EditorWindow : ApplicationWindow {
+private:
+    CssProvider lightTheme;
+    CssProvider darkTheme;
+
 public:
     ModelingViewport viewport;
     EditorHeaderBar headerBar;
@@ -21,6 +26,7 @@ public:
         super(app);
 
         addStylesheet(import("style.scss"));
+        this.getSettings().setProperty("gtk-application-prefer-dark-theme", CONFIG.darkMode);
 
         // Set up header bars and other controls
         headerBar = new EditorHeaderBar(this, VSME_TITLE);
@@ -35,6 +41,10 @@ public:
 
     void addStylesheet(string code) {
         this.getStyleContext().addProviderForScreen(this.getScreen(), styleFromString(code), STYLE_PROVIDER_PRIORITY_USER);
+    }
+
+    void switchToDarkMode() {
+
     }
 }
 
