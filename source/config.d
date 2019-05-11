@@ -3,8 +3,16 @@ import asdf;
 static import io = std.stdio;
 import std.file;
 
+struct CameraConfig {
+    bool perspective = true;
+    float fov = 90f;
+    float znear = 0.1;
+    float zfar = 1000;
+}
+
 struct Config {
     float[3] backgroundColor = [.5f, .5f, .5f];
+    CameraConfig camera;
 }
 
 __gshared static Config CONFIG;

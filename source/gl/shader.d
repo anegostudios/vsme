@@ -6,6 +6,7 @@ import std.stdio : writefln;
 import std.path : extension;
 import std.conv;
 import gl;
+import math;
 
 enum ShaderType {
     Vertex = GL_VERTEX_SHADER,
@@ -86,7 +87,7 @@ public:
         // Lil' type checking
         if (vertex.type != ShaderType.Vertex) 
             throw new Exception("Cannot link vertex shader as a fragment shader!");
-            
+
         if (fragment.type != ShaderType.Fragment) 
             throw new Exception("Cannot link fragment shader as a vertex shader!");
 
@@ -115,6 +116,26 @@ public:
         Shader vertShader = Shader(vert, import(vert), ShaderType.Vertex);
         Shader fragShader = Shader(frag, import(frag), ShaderType.Fragment);
         return ShaderProgram(vertShader, fragShader);
+    }
+
+    GLuint getUniform(string name) {
+        return glGetUniformLocation(programId, toStringz(name));
+    }
+
+    void setUniform(GLuint id, float x) {
+        glUniform1f(id, x);
+    }
+
+    void setUniform(GLuint id, float x, float y) {
+        glUniform2f(id, x, y);
+    }
+
+    void setUniform(GLuint id, float x, float y, float z) {
+        glUniform3f(id, x, y, z);
+    }
+
+    void setUniform(GLuint id, Matrix4x4 matrix) {
+        glUniformMatrix4fv(id, 1, GL_FALSE, &matrix.matrix[0][0]);
     }
 
     void use() {

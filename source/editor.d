@@ -25,7 +25,7 @@ public:
         // Set title, titlebar and show the window
         this.setTitlebar(headerBar);
 
-        viewport = new ModelingViewport();
+        viewport = new ModelingViewport(this);
         this.add(viewport);
         this.showAll();
     }
