@@ -92,7 +92,7 @@ public:
         return true;
     }
 
-    override bool onKeyReleaseEvent(GdkEventKey* key) {
+    override bool onKeyPressEvent(GdkEventKey* key) {
         import gdk.Keysyms;
         if (key.keyval == Keysyms.GDK_Q) {
             CONFIG.camera.perspective = !CONFIG.camera.perspective;

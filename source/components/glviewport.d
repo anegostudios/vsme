@@ -1,6 +1,7 @@
 module components.glviewport;
 import gtk.GLArea;
 import gtk.EventBox;
+import gtk.Overlay;
 import bindbc.opengl;
 import gdk.GLContext : GLContext;
 import gtk.ApplicationWindow;
@@ -8,12 +9,73 @@ import config;
 import std.stdio;
 import gtk.Widget;
 import gobject.Signals;
+import gtk.ToggleButton;
+import gtk.StackSwitcher;
 
 public:
 
-class EditorViewport : EventBox {
+class EditorProjSwitch : StackSwitcher {
+private:
+    ToggleButton ortho;
+    ToggleButton persp;
+    EditorViewport parent;
+
+    bool isHandlingSwitch;
+
+public:
+    this(EditorViewport parent) {
+        super();
+        this.parent = parent;
+
+        persp = new ToggleButton("Persp");
+        persp.addOnClicked((widget) {
+            if (isHandlingSwitch) return;
+
+            isHandlingSwitch = true;
+            ortho.setActive(false);
+            persp.setActive(true);
+            CONFIG.camera.perspective = true;
+            isHandlingSwitch = false;
+        });
+
+        ortho = new ToggleButton("Ortho");
+        ortho.addOnClicked((widget) {
+            if (isHandlingSwitch) return;
+
+            isHandlingSwitch = true;
+            ortho.setActive(true);
+            persp.setActive(false);
+            CONFIG.camera.perspective = false;
+            isHandlingSwitch = false;
+        });
+
+        this.packStart(persp, true, false, 0);
+        this.packEnd(ortho, true, false, 0);
+
+        this.setHalign(GtkAlign.START);
+        this.setValign(GtkAlign.START);
+
+        this.setSizeRequest(32, 16);
+        this.setMarginStart(4);
+        this.setMarginTop(4);
+
+        persp.setActive(CONFIG.camera.perspective);
+        ortho.setActive(!CONFIG.camera.perspective);
+
+        persp.getStyleContext().addClass("vsme-mode-switch");
+        ortho.getStyleContext().addClass("vsme-mode-switch");
+
+        persp.getStyleContext().invalidate();
+        ortho.getStyleContext().invalidate();
+
+        this.showAll();
+    }
+}
+
+class EditorViewport : Overlay {
 protected:
     GLArea viewport;
+    EventBox evbox;
 
 public:
     ref GLArea getViewport() {
@@ -23,6 +85,7 @@ public:
     int height;
 
     this(ApplicationWindow root) {
+        evbox = new EventBox();
         viewport = new GLArea();
         viewport.addOnRealize((widget) {
             this.width = widget.getAllocatedWidth();
@@ -43,20 +106,28 @@ public:
             });
         });
 
-        this.addEvents(GdkEventMask.ALL_EVENTS_MASK);
-
         /// TODO: the logic should probably be moved elsewhere.
         root.addOnKeyPress((GdkEventKey* key, widget) => onKeyPressEvent(key));
         root.addOnKeyRelease((GdkEventKey* key, widget) => onKeyReleaseEvent(key));
 
-        this.addOnButtonPress((GdkEventButton* button, widget) => onButtonPressEvent(button));
-        this.addOnButtonRelease((GdkEventButton* button, widget) => onButtonReleaseEvent(button));
+        evbox.addOnButtonPress((GdkEventButton* button, widget) => onButtonPressEvent(button));
+        evbox.addOnButtonRelease((GdkEventButton* button, widget) => onButtonReleaseEvent(button));
         
-        this.addOnMotionNotify((GdkEventMotion* motion, widget) => onMotionNotifyEvent(motion));
+        evbox.addOnMotionNotify((GdkEventMotion* motion, widget) => onMotionNotifyEvent(motion));
 
-        this.add(viewport);
+        evbox.add(viewport);
+        this.add(evbox);
+        this.addOverlay(new EditorProjSwitch(this));
         this.showAll();
     }
+
+    // bool onKeyPressEvent(GdkEventKey* key);
+    // bool onKeyReleaseEvent(GdkEventKey* key);
+
+    // bool onButtonPressEvent(GdkEventButton* key);
+    // bool onButtonReleaseEvent(GdkEventButton* key);
+
+    // bool onMotionNotifyEvent(GdkEventMotion* key);
 
     final void initGL() {
         /// Load OpenGL
