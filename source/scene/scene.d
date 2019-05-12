@@ -4,6 +4,7 @@ import scene.nodes;
 import vsformat;
 import std.stdio;
 import gl.camera;
+import std.math;
 
 class Scene {
 private:
@@ -77,10 +78,19 @@ Node nodeFromJElement(JElement jelement, Node parent = null) {
         n.origin = Vector3(jelement.rotationOrigin[0], jelement.rotationOrigin[1], jelement.rotationOrigin[2]);
     }
 
-    n.rotation = Quaternion.identity();
-    n.rotation.rotatex(jelement.rotationX);
-    n.rotation.rotatey(jelement.rotationY);
-    n.rotation.rotatez(jelement.rotationZ);
+    // n.rotation = Vector3(
+    //     jelement.rotationX == float.nan ? 0 : jelement.rotationX, 
+    //     jelement.rotationY == float.nan ? 0 : jelement.rotationY, 
+    //     jelement.rotationZ == float.nan ? 0 : jelement.rotationZ);
+    if (!isNaN(jelement.rotationX)) {
+        n.rotation.x = jelement.rotationX;
+    }
+    if (!isNaN(jelement.rotationY)) {
+        n.rotation.y = jelement.rotationY;
+    }
+    if (!isNaN(jelement.rotationZ)) {
+        n.rotation.z = jelement.rotationZ;
+    }
 
     n.legacyTint = jelement.tintIndex;
 

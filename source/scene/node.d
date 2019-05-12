@@ -37,16 +37,16 @@ public:
     bool visible;
 
     /// Position of the node
-    Vector3 startPosition;
+    Vector3 startPosition = Vector3(0, 0, 0);
 
     /// Position of the node
-    Vector3 endPosition;
+    Vector3 endPosition = Vector3(0, 0, 0);
 
     /// Origin vector
-    Vector3 origin;
+    Vector3 origin = Vector3(0, 0, 0);
 
     /// Rotation of the node
-    Quaternion rotation;
+    Vector3 rotation = Vector3(0, 0, 0);
     
     Node parent;
 
@@ -97,16 +97,20 @@ public:
     abstract void render(Camera camera);
 
     Matrix4x4 model() {
-        Matrix4x4 rotationMatrix = rotation.to_matrix!(4, 4);
+        Matrix4x4 rotationMatrix = Matrix4x4.identity();
+        rotationMatrix.rotatex(mathf.radians(rotation.x));
+        rotationMatrix.rotatey(mathf.radians(rotation.y));
+        rotationMatrix.rotatez(mathf.radians(rotation.z));
+        
         Matrix4x4 originMatrix = Matrix4x4.translation(origin);
         Matrix4x4 minusOriginMatrix = Matrix4x4.translation(-origin);
         Matrix4x4 startMatrix = Matrix4x4.translation(startPosition);
 
         Matrix4x4 modelMatrix = Matrix4x4.identity();
-        if (originMatrix.ok) modelMatrix *= originMatrix;
-        if (rotationMatrix.ok) modelMatrix *= rotationMatrix;
-        if (minusOriginMatrix.ok) modelMatrix *= minusOriginMatrix;
-        if (startMatrix.ok) modelMatrix *= startMatrix;
+        if (originMatrix.isFinite) modelMatrix *= originMatrix;
+        if (rotationMatrix.isFinite) modelMatrix *= rotationMatrix;
+        if (minusOriginMatrix.isFinite) modelMatrix *= minusOriginMatrix;
+        if (startMatrix.isFinite) modelMatrix *= startMatrix;
 
         if (parent !is null) {
             modelMatrix = parent.model * modelMatrix;
