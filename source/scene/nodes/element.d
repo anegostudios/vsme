@@ -26,7 +26,7 @@ private:
 
     void genBuffers() {
         // Generate cube and add brightness map
-        verts = generateCube(this.startPosition, this.endPosition);
+        verts = generateCube(Vector3(0, 0, 0), this.endPosition-this.startPosition);
         writefln("Generating buffer for %s with %d tris...", name, cubeIndices.length/3);
 
         glGenVertexArrays(1, &vao);
@@ -90,7 +90,7 @@ public:
     }
 
     override void updateBuffer() {
-        verts = generateCube(this.startPosition, this.endPosition);
+        verts = generateCube(Vector3(0, 0, 0), this.endPosition-this.startPosition);
         writefln("Updating buffer for %s with %d tris...", name, cubeIndices.length/3);
 
         glBindBuffer(GL_ARRAY_BUFFER, vbo);

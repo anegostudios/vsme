@@ -16,13 +16,17 @@ public:
 
 class EditorProjSwitch : StackSwitcher {
 private:
-    ToggleButton ortho;
-    ToggleButton persp;
     EditorViewport parent;
 
     bool isHandlingSwitch;
 
 public:
+    /// Orthographic switch
+    ToggleButton ortho;
+
+    /// Perspective switch
+    ToggleButton persp;
+
     this(EditorViewport parent) {
         super();
         this.parent = parent;
@@ -76,6 +80,7 @@ class EditorViewport : Overlay {
 protected:
     GLArea viewport;
     EventBox evbox;
+    EditorProjSwitch projectionSwitch;
 
 public:
     ref GLArea getViewport() {
@@ -105,6 +110,7 @@ public:
                 return true;
             });
         });
+        evbox.add(viewport);
 
         /// TODO: the logic should probably be moved elsewhere.
         root.addOnKeyPress((GdkEventKey* key, widget) => onKeyPressEvent(key));
@@ -114,10 +120,10 @@ public:
         evbox.addOnButtonRelease((GdkEventButton* button, widget) => onButtonReleaseEvent(button));
         
         evbox.addOnMotionNotify((GdkEventMotion* motion, widget) => onMotionNotifyEvent(motion));
-
-        evbox.add(viewport);
         this.add(evbox);
-        this.addOverlay(new EditorProjSwitch(this));
+
+        projectionSwitch = new EditorProjSwitch(this);
+        this.addOverlay(projectionSwitch);
         this.showAll();
     }
 
@@ -138,6 +144,7 @@ public:
 
         // Enable multi-sampling
         glEnable(GL_MULTISAMPLE);
+        glEnable(GL_PROGRAM_POINT_SIZE);
         glDisable(GL_CULL_FACE);
 
         // Resize OpenGL viewport if neccesary

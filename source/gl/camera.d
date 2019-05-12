@@ -6,12 +6,12 @@ import components.glviewport;
 class Camera {
 private:
     EditorViewport parent;
-    float rot = 0;
 
 public:
+    float zoom;
     Vector3 origin;
     Vector3 position;
-    Matrix4x4 lookatMatr;
+    
     Matrix4x4 view;
     Matrix4x4 projection;
 

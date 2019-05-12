@@ -32,17 +32,15 @@ public:
         camera = new Camera(this);
     }
     
-    override bool onButtonReleaseEvent(GdkEventButton* button) {
-        if (button.button == 2) {
-            CONFIG.camera.perspective = !CONFIG.camera.perspective;
-        }
-        return true;
-    }
-
     override bool onKeyPressEvent(GdkEventKey* key) {
         import gdk.Keysyms;
         if (key.keyval == Keysyms.GDK_Q) {
-            CONFIG.camera.perspective = !CONFIG.camera.perspective;
+            
+            if (CONFIG.camera.perspective) {
+                this.projectionSwitch.ortho.setActive(true);
+            } else {
+                this.projectionSwitch.persp.setActive(true);
+            }
         }
         return true;
     }

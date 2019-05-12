@@ -99,10 +99,14 @@ public:
     Matrix4x4 model() {
         Matrix4x4 rotationMatrix = rotation.to_matrix!(4, 4);
         Matrix4x4 originMatrix = Matrix4x4.translation(origin);
+        Matrix4x4 minusOriginMatrix = Matrix4x4.translation(-origin);
+        Matrix4x4 startMatrix = Matrix4x4.translation(startPosition);
 
         Matrix4x4 modelMatrix = Matrix4x4.identity();
-        if (rotationMatrix.ok) modelMatrix *= rotationMatrix;
         if (originMatrix.ok) modelMatrix *= originMatrix;
+        if (rotationMatrix.ok) modelMatrix *= rotationMatrix;
+        if (minusOriginMatrix.ok) modelMatrix *= minusOriginMatrix;
+        if (startMatrix.ok) modelMatrix *= startMatrix;
 
         if (parent !is null) {
             modelMatrix = parent.model * modelMatrix;
