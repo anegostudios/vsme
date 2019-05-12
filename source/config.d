@@ -8,6 +8,9 @@ struct CameraConfig {
     float fov = 90f;
     float znear = 0.1;
     float zfar = 1000;
+
+    bool invertX = false;
+    bool invertY = false;
 }
 
 struct Config {

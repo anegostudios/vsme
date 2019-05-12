@@ -31,7 +31,9 @@ public:
         LINE_SHADER = loadShaderOptimal!("line");
 
         camera = new Camera(this);
-        camera.changeFocus(Vector3(0, 0, 0), 20);
+        camera.changeFocus(Vector3(0, 0, 0), 50);
+        camera.rotationX = mathf.radians(25f);
+        camera.rotationY = mathf.radians(90f);
     }
     
     override bool onKeyPressEvent(GdkEventKey* key) {
@@ -75,9 +77,11 @@ public:
             camera.rotationX = refRotationX;
             camera.rotationY = refRotationY;
 
-            //writeln(motion.x, " ", motion.y, " ", referencePosition);
-            camera.rotationY -= mathf.radians(referencePosition.x-motion.x);
-            camera.rotationX -= mathf.radians(referencePosition.y-motion.y);
+            if (!CONFIG.camera.invertX) camera.rotationX  -= mathf.radians(referencePosition.y-motion.y);
+            else camera.rotationX += mathf.radians(referencePosition.y-motion.y);
+
+            if (!CONFIG.camera.invertY) camera.rotationY -= mathf.radians(referencePosition.x-motion.x);
+            else camera.rotationY += mathf.radians(referencePosition.x-motion.x);
             return true;
         }
         return false;
@@ -94,6 +98,9 @@ public:
         if (SCENE !is null) {
             if (SCENE.sceneReloaded()) {
                 SCENE.setContext(this.viewport);
+                Vector3 start = SCENE.rootNode.children[0].startPosition;
+                Vector3 end = SCENE.rootNode.children[0].endPosition;
+                camera.changeFocus(start+((end-start)/2), 50);
             }
             SCENE.update();
             SCENE.render(camera);

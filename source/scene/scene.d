@@ -45,15 +45,16 @@ public:
             DIR_GUIDE = new LineGuide(camera);
         }
         rootNode.render(camera);
-        DIR_GUIDE.drawLine(Vector3(-8, 0, 0), Vector3(8, 0, 0), Vector3(.8f, 0, 0), Matrix4x4.identity(), 8f);
-        DIR_GUIDE.drawLine(Vector3(0, -8, 0), Vector3(0, 8, 0), Vector3(0, .8f, 0), Matrix4x4.identity(), 8f);
-        DIR_GUIDE.drawLine(Vector3(0, 0, -8), Vector3(0, 0, 8), Vector3(0, 0, .8f), Matrix4x4.identity(), 8f);
+        DIR_GUIDE.drawLine(Vector3(0, 0, 0), Vector3(8, 0, 0), Vector3(.8f, 0, 0), Matrix4x4.identity(), 8f);
+        DIR_GUIDE.drawLine(Vector3(0, 0, 0), Vector3(0, 8, 0), Vector3(0, .8f, 0), Matrix4x4.identity(), 8f);
+        DIR_GUIDE.drawLine(Vector3(0, 0, 0), Vector3(0, 0, 8), Vector3(0, 0, .8f), Matrix4x4.identity(), 8f);
 
 
         /// Disable depth buffer for post-rendering
         glClear(GL_DEPTH_BUFFER_BIT);
         glDisable(GL_DEPTH);
         rootNode.postRender(camera);
+        DIR_GUIDE.drawLine(camera.origin, Vector3(camera.origin.x, camera.origin.y+0.1f, camera.origin.z), Vector3(0, 0, 0), Matrix4x4.identity(), 3f);
         glEnable(GL_DEPTH);
     }
 

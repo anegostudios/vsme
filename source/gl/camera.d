@@ -39,10 +39,11 @@ public:
 
     void transformView() {
         if (this.distance < CONFIG.camera.znear) this.distance = CONFIG.camera.znear;
-        Matrix4x4 positionMatrix = Matrix4x4.translation(origin);
+        Matrix4x4 positionMatrix = Matrix4x4.identity();
         positionMatrix *= Matrix4x4.translation(Vector3(0, 0, CONFIG.camera.perspective ? -distance : -DEFAULT_DIST_ORTHO));
         positionMatrix *= Matrix4x4.xrotation(rotationX);
         positionMatrix *= Matrix4x4.yrotation(rotationY);
+        positionMatrix *= Matrix4x4.translation(-origin);
         //positionMatrix *= rotation.to_matrix!(4, 4);
         view = positionMatrix;
     }
