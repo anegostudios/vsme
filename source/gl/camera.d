@@ -6,36 +6,43 @@ import components.glviewport;
 class Camera {
 private:
     EditorViewport parent;
+    float rot = 0;
 
 public:
+    Vector3 origin;
     Vector3 position;
-    Matrix4x4 rotation;
+    Matrix4x4 lookatMatr;
+    Matrix4x4 view;
     Matrix4x4 projection;
 
     this(EditorViewport parent) {
         this.parent = parent;
-        this.rotation = Matrix4x4.identity();
+        this.view = Matrix4x4.identity();
         this.projection = Matrix4x4.identity();
+        this.origin = Vector3(0, 0, 0);
     }
 
     Matrix4x4 model() {
         return Matrix4x4.identity();
     }
 
-    Matrix4x4 view() {
-        return rotation;
-    }
-
     Matrix4x4 mvp() {
-        return (projection * view * model).transposed;
+        return projection * (lookatMatr) * model;
     }
 
-    void  lookat(Vector3 point) {
-        rotation = Matrix4x4.look_at(position, point, Vector3(0, 1, 0));
+    void lookat(Vector3 point) {
+        Vector3 pos = Vector3(this.view[0][3], this.view[1][3], this.view[2][3]);
+        lookatMatr = Matrix4x4.look_at(pos, point, Vector3(0, 1, 0));
         //rotation = Quaternion.from_matrix();//lookAt(position, point);
     }
 
     void update() {
+        this.rot += mathf.radians(1f);
+        Matrix4x4 rotMatr = Matrix4x4.translation(origin).rotatey(this.rot);
+        this.view = Matrix4x4.identity();
+        this.view.translate(position);
+        this.view = rotMatr * this.view;
+
         if (CONFIG.camera.perspective) {
             projection = Matrix4x4.perspective(cast(float)parent.width, cast(float)parent.height, CONFIG.camera.fov, CONFIG.camera.znear, CONFIG.camera.zfar);
         } else {

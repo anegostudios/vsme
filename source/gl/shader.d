@@ -135,7 +135,7 @@ public:
     }
 
     void setUniform(GLuint id, Matrix4x4 matrix) {
-        glUniformMatrix4fv(id, 1, GL_FALSE, &matrix.matrix[0][0]);
+        glUniformMatrix4fv(id, 1, GL_TRUE, &matrix.matrix[0][0]);
     }
 
     void use() {
