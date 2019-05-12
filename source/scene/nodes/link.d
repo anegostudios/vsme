@@ -16,7 +16,16 @@ public:
 
     }
 
-    override void render() {
+    override void render(Camera camera) {
+        foreach(child; children) {
+            child.render(camera);
+        }
+    }
 
+    override void postRender(Camera camera) {
+        super.postRender(camera);
+        
+        // TODO: Draw link-icon
+        
     }
 }

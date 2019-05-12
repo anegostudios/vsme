@@ -3,15 +3,44 @@ import scene.node;
 import scene.nodes;
 import vsformat;
 import std.stdio;
+import gl.camera;
 
 class Scene {
-    Node rootNode;
+private:
+    bool shouldInit = true;
+    GLArea ctx;
 
+public:
+    Node rootNode;
     string[string] textures;
     
+    ~this() {
+        import core.memory : GC;
+        destroy(rootNode);
+        GC.collect();
+    }
+
+    bool sceneReloaded() {
+        return shouldInit;
+    }
+
+    void setContext(GLArea area) {
+        this.ctx = area;
+    }
+
     void update() {
+        if (shouldInit) {
+            rootNode.setContext(this.ctx);
+            rootNode.init();
+            shouldInit = false;
+        }
         rootNode.update();
         rootNode.updateBuffer();
+    }
+
+    void render(Camera camera) {
+        rootNode.render(camera);
+        rootNode.postRender(camera);
     }
 
     override string toString() {
@@ -20,6 +49,8 @@ class Scene {
 }
 
 void loadFromVSMCFile(string path) {
+    if (SCENE !is null) destroy(SCENE);
+
     import std.file : readText;
     JShape shape = shapeFromJson(readText(path));
     Scene scene = new Scene();
@@ -28,6 +59,7 @@ void loadFromVSMCFile(string path) {
     foreach(elem; shape.elements) {
         scene.rootNode.children ~= nodeFromJElement(elem);
     }
+
     SCENE = scene;
 
     writeln("Loaded scene!\n\n", scene);

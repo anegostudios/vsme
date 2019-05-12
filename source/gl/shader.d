@@ -138,6 +138,14 @@ public:
         glUniformMatrix4fv(id, 1, GL_TRUE, &matrix.matrix[0][0]);
     }
 
+    void setUniform(GLuint id, Vector3 vec) {
+        setUniform(id, vec.x, vec.y, vec.z);
+    }
+
+    void setUniform(GLuint id, Vector2 vec) {
+        setUniform(id, vec.x, vec.y);
+    }
+
     void use() {
         glUseProgram(programId);
     }

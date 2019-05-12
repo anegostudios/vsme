@@ -22,27 +22,15 @@ public:
         this.origin = Vector3(0, 0, 0);
     }
 
-    Matrix4x4 model() {
-        return Matrix4x4.identity();
-    }
-
     Matrix4x4 mvp() {
-        return projection * (lookatMatr) * model;
+        return projection * view;
     }
 
-    void lookat(Vector3 point) {
-        Vector3 pos = Vector3(this.view[0][3], this.view[1][3], this.view[2][3]);
-        lookatMatr = Matrix4x4.look_at(pos, point, Vector3(0, 1, 0));
-        //rotation = Quaternion.from_matrix();//lookAt(position, point);
+    void lookAt(Vector3 point) {
+        view = Matrix4x4.look_at(position, point, Vector3(0, 1, 0));
     }
 
     void update() {
-        this.rot += mathf.radians(1f);
-        Matrix4x4 rotMatr = Matrix4x4.translation(origin).rotatey(this.rot);
-        this.view = Matrix4x4.identity();
-        this.view.translate(position);
-        this.view = rotMatr * this.view;
-
         if (CONFIG.camera.perspective) {
             projection = Matrix4x4.perspective(cast(float)parent.width, cast(float)parent.height, CONFIG.camera.fov, CONFIG.camera.znear, CONFIG.camera.zfar);
         } else {

@@ -2,9 +2,13 @@
 
 // Else some GPUs will complain
 precision highp float;
-in vec3 exPosition;
+
+uniform vec3 color;
+
+in vec3 brightnessMap;
 out vec4 outColor;
 
+
 void main() {
-    outColor = vec4(exPosition+.5, 1.0);
+    outColor = vec4((color.xyz*brightnessMap), 1.0);
 }

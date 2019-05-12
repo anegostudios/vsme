@@ -10,6 +10,8 @@ public:
     this() {
         super(NodeType.RootNode);
         this.name = "root";
+        this.startPosition = Vector3(0, 0, 0);
+        this.endPosition = Vector3(0, 0, 0);
     }
 
     override Matrix4x4 transform() {
@@ -17,14 +19,12 @@ public:
     }
 
     override void updateBuffer() {
-        foreach(child; children) {
-            updateBuffer();
-        }
+        // There's no buffer in the root node
     }
 
-    override void render() {
+    override void render(Camera camera) {
         foreach(child; children) {
-            render();
+            child.render(camera);
         }
     }
 }

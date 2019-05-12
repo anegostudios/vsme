@@ -136,6 +136,10 @@ public:
             throw new Error("Expected AT LEAST OpenGL 3.2 support!");
         }
 
+        // Enable multi-sampling
+        glEnable(GL_MULTISAMPLE);
+        glDisable(GL_CULL_FACE);
+
         // Resize OpenGL viewport if neccesary
         viewport.addOnResize(&onResize);
 

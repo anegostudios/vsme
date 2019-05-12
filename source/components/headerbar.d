@@ -76,7 +76,7 @@ public:
                 writeln("FileOP - Load: ", file);
                 import scene.scene : loadFromVSMCFile;
                 loadFromVSMCFile(file);
-
+                this.setSubtitle(file);
                 return;
             }
         });
