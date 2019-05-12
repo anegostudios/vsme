@@ -8,6 +8,9 @@ enum CameraMode {
     FreeCam = 1
 }
 
+enum DEFAULT_DIST = 5;
+enum DEFAULT_DIST_ORTHO = 50;
+
 class Camera {
 private:
     EditorViewport parent;
@@ -15,7 +18,7 @@ private:
 public:
     CameraMode mode = CameraMode.ArcBall;
 
-    float distance = 5;
+    float distance = DEFAULT_DIST;
     float rotationX = 0;
     float rotationY = 0;
     Vector3 origin;
@@ -35,9 +38,9 @@ public:
     }
 
     void transformView() {
-        import std.stdio;
+        if (this.distance < CONFIG.camera.znear) this.distance = CONFIG.camera.znear;
         Matrix4x4 positionMatrix = Matrix4x4.translation(origin);
-        positionMatrix *= Matrix4x4.translation(Vector3(0, 0, -distance));
+        positionMatrix *= Matrix4x4.translation(Vector3(0, 0, CONFIG.camera.perspective ? -distance : -DEFAULT_DIST_ORTHO));
         positionMatrix *= Matrix4x4.xrotation(rotationX);
         positionMatrix *= Matrix4x4.yrotation(rotationY);
         //positionMatrix *= rotation.to_matrix!(4, 4);
@@ -47,7 +50,6 @@ public:
     void changeFocus(Vector3 focusItem, float distance) {
         origin = focusItem;
         this.distance = distance;
-        if (this.distance < 0) this.distance = 0.1f;
     }
 
     /*void lookAt(Vector3 point) {
@@ -66,8 +68,11 @@ public:
             if (w < h) r = w;
             else r = h;
 
-            float w_d = (w/r)*(r/CONFIG.camera.fov);
-            float h_d = (h/r)*(r/CONFIG.camera.fov);
+            float distx = (distance/2);
+            if (distx < CONFIG.camera.znear) distx = CONFIG.camera.znear;
+
+            float w_d = (w/r)*distx;
+            float h_d = (h/r)*distx;
             projection = Matrix4x4.orthographic(-w_d, w_d, -h_d, h_d, CONFIG.camera.znear, CONFIG.camera.zfar);
         }
     }
