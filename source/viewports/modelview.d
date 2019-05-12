@@ -13,6 +13,12 @@ import scene.scene;
 
 class ModelingViewport : EditorViewport {
 public:
+    bool isMovingCamera;
+
+    Vector2 referencePosition;
+    float refRotationX;
+    float refRotationY;
+
     Camera camera;
     import std.stdio : writeln;
 
@@ -25,6 +31,7 @@ public:
         LINE_SHADER = loadShaderOptimal!("line");
 
         camera = new Camera(this);
+        camera.changeFocus(Vector3(0, 0, 0), 20);
     }
     
     override bool onKeyPressEvent(GdkEventKey* key) {
@@ -40,9 +47,46 @@ public:
         return true;
     }
 
+    override bool onButtonPressEvent(GdkEventButton* button) {
+        if (!isMovingCamera && button.button == 2) {
+            referencePosition = Vector2(button.x, button.y);
+            refRotationX = camera.rotationX;
+            refRotationY = camera.rotationY;
+            isMovingCamera = true;
+            return true;
+        }
+        return false;
+    }
+
+    override bool onScrollEvent(GdkEventScroll* scroll) {
+        camera.distance += scroll.deltaY;
+        return false;
+    }
+
+    override bool onButtonReleaseEvent(GdkEventButton* button) {
+        if (button.button == 2) {
+            isMovingCamera = false;
+        }
+        return false;
+    }
+
+    override bool onMotionNotifyEvent(GdkEventMotion* motion) {
+        if (isMovingCamera) {
+            camera.rotationX = refRotationX;
+            camera.rotationY = refRotationY;
+
+            //writeln(motion.x, " ", motion.y, " ", referencePosition);
+            camera.rotationY -= mathf.radians(referencePosition.x-motion.x);
+            camera.rotationX -= mathf.radians(referencePosition.y-motion.y);
+            return true;
+        }
+        return false;
+    }
+
     override void update() {
-        camera.position = Vector3(20, 21, 20);
-        camera.lookAt(Vector3(0, 0, 0));
+        // camera.position = Vector3(20, 21, 20);
+        // camera.lookAt(Vector3(0, 0, 0));
+        camera.transformView();
         camera.update();
     }
 

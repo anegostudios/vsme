@@ -118,8 +118,8 @@ public:
 
         evbox.addOnButtonPress((GdkEventButton* button, widget) => onButtonPressEvent(button));
         evbox.addOnButtonRelease((GdkEventButton* button, widget) => onButtonReleaseEvent(button));
-        
-        evbox.addOnMotionNotify((GdkEventMotion* motion, widget) => onMotionNotifyEvent(motion));
+        root.addOnScroll((GdkEventScroll* scroll, widget) => onScrollEvent(scroll));
+        root.addOnMotionNotify((GdkEventMotion* motion, widget) => onMotionNotifyEvent(motion));
         this.add(evbox);
 
         projectionSwitch = new EditorProjSwitch(this);
@@ -143,9 +143,9 @@ public:
         }
 
         // Enable multi-sampling
+        glEnable(GL_PROGRAM_POINT_SIZE);
         glEnable(GL_LINE_SMOOTH);
         glEnable(GL_MULTISAMPLE);
-        glEnable(GL_PROGRAM_POINT_SIZE);
         glDisable(GL_CULL_FACE);
 
         // Resize OpenGL viewport if neccesary

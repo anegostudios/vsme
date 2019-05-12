@@ -39,7 +39,7 @@ public:
             to.x, to.y, to.z
         ];
         glBufferSubData(GL_ARRAY_BUFFER, 0, verts.length*float.sizeof, verts.ptr);
-        
+        glLineWidth(lineWidth);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, null);
         glEnableVertexAttribArray(0);
         LINE_SHADER.use();
