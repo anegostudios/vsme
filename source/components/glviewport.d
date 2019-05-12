@@ -143,6 +143,7 @@ public:
         }
 
         // Enable multi-sampling
+        glEnable(GL_LINE_SMOOTH);
         glEnable(GL_MULTISAMPLE);
         glEnable(GL_PROGRAM_POINT_SIZE);
         glDisable(GL_CULL_FACE);

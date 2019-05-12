@@ -5,6 +5,7 @@ import vsformat;
 import std.stdio;
 import gl.camera;
 import std.math;
+import utils.lineguide;
 
 class Scene {
 private:
@@ -14,7 +15,7 @@ private:
 public:
     Node rootNode;
     string[string] textures;
-    
+
     ~this() {
         import core.memory : GC;
         destroy(rootNode);
@@ -40,8 +41,20 @@ public:
     }
 
     void render(Camera camera) {
+        if (DIR_GUIDE is null) {
+            DIR_GUIDE = new LineGuide(camera);
+        }
         rootNode.render(camera);
+
+        /// Disable depth buffer for post-rendering
+        glDisable(GL_DEPTH);
         rootNode.postRender(camera);
+
+        DIR_GUIDE.drawLine(Vector3(-8, 0, 0), Vector3(8, 0, 0), Vector3(1, 0, 0), Matrix4x4.identity(), 4f);
+        DIR_GUIDE.drawLine(Vector3(0, -8, 0), Vector3(0, 8, 0), Vector3(0, 1, 0), Matrix4x4.identity(), 4f);
+        DIR_GUIDE.drawLine(Vector3(0, 0, -8), Vector3(0, 0, 8), Vector3(0, 0, 1), Matrix4x4.identity(), 4f);
+
+        glEnable(GL_DEPTH);
     }
 
     override string toString() {
@@ -113,3 +126,5 @@ void loadFromVSMEProject(string path) {
 }
 
 __gshared static Scene SCENE;
+
+__gshared static LineGuide DIR_GUIDE;

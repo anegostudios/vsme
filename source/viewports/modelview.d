@@ -21,13 +21,8 @@ public:
     }
 
     override void init() {
-        version(RELEASE) {
-            BASIC_SHADER = ShaderProgram.fromFilesCompileTime!("basic.vert", "basic.frag")();
-        } else {
-            Shader vert = Shader.loadFromFile("shaders/basic.vert");
-            Shader frag = Shader.loadFromFile("shaders/basic.frag");
-            BASIC_SHADER = ShaderProgram(vert, frag);
-        }
+        BASIC_SHADER = loadShaderOptimal!("basic");
+        LINE_SHADER = loadShaderOptimal!("line");
 
         camera = new Camera(this);
     }
@@ -35,7 +30,7 @@ public:
     override bool onKeyPressEvent(GdkEventKey* key) {
         import gdk.Keysyms;
         if (key.keyval == Keysyms.GDK_Q) {
-            
+
             if (CONFIG.camera.perspective) {
                 this.projectionSwitch.ortho.setActive(true);
             } else {
@@ -60,5 +55,15 @@ public:
             SCENE.render(camera);
         }
         return true;
+    }
+}
+
+ShaderProgram loadShaderOptimal(string name)() {
+    version(RELEASE) {
+        return ShaderProgram.fromFilesCompileTime!(name~".vert", name~".frag")();
+    } else {
+        Shader vert = Shader.loadFromFile("shaders/"~name~".vert");
+        Shader frag = Shader.loadFromFile("shaders/"~name~".frag");
+        return ShaderProgram(vert, frag);
     }
 }
