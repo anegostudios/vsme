@@ -48,14 +48,17 @@ public:
     /// Rotation of the node
     Quaternion rotation;
     
+    Node parent;
+
     /// Children attached to the node
     Node[] children;
 
     /// Legacy tint index.
     int legacyTint;
 
-    this(NodeType type) {
+    this(NodeType type, Node parent = null) {
         this.typeId = type;
+        this.parent = parent;
     }
 
     final void setContext(GLArea context) {
@@ -101,6 +104,9 @@ public:
         if (rotationMatrix.ok) modelMatrix *= rotationMatrix;
         if (originMatrix.ok) modelMatrix *= originMatrix;
 
+        if (parent !is null) {
+            modelMatrix = parent.model * modelMatrix;
+        }
         return modelMatrix;
     }
 

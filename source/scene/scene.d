@@ -65,8 +65,8 @@ void loadFromVSMCFile(string path) {
     writeln("Loaded scene!\n\n", scene);
 }
 
-Node nodeFromJElement(JElement jelement) {
-    ElementNode n = new ElementNode();
+Node nodeFromJElement(JElement jelement, Node parent = null) {
+    ElementNode n = new ElementNode(parent);
     
     n.name = jelement.name;
 
@@ -93,7 +93,7 @@ Node nodeFromJElement(JElement jelement) {
     }
 
     foreach(child; jelement.children) {
-        n.children ~= nodeFromJElement(child);
+        n.children ~= nodeFromJElement(child, n);
     }
     return n;
 }

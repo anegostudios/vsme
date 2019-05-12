@@ -51,8 +51,8 @@ private:
 public:
     Face[string] faces;
 
-    this() {
-        super(NodeType.ElementNode);
+    this(Node parent = null) {
+        super(NodeType.ElementNode, parent);
     }
 
     ~this() {
