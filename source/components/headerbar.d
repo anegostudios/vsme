@@ -11,16 +11,25 @@ import glib.VariantType;
 import gtk.ApplicationWindow;
 import gtk.Image;
 import gtk.FileChooserDialog;
+import gtk.ColorChooserDialog;
 import std.stdio;
+import gdk.RGBA;
+import config;
 
 class EditorHeaderBar : HeaderBar {
 private:
     ApplicationWindow parent;
 public:
+    /// Load Button
     MenuButton newButton;
     MenuButton loadButton;
     MenuButton saveButton;
     Popover loadPopover;
+
+    /// Hamburger Menu
+    MenuButton hamburgerButton;
+    Popover hamburgerPopover;
+
 
     this(ApplicationWindow parent, string title) {
         super();
@@ -30,6 +39,8 @@ public:
         initNew();
         initLoad();
         initSave();
+
+        initHamburger();
 
         this.setShowCloseButton(true);
         this.setTitle(title);
@@ -103,22 +114,49 @@ public:
 
         this.packStart(saveButton);
     }
-}
 
-enum LoadPopoverModel = `
-<?xml version="1.0" encoding="UTF-8"?>
-<interface>
-  <menu id="app-menu">
-    <section>
-        <item>
-            <attribute name="label">Load From File</attribute>
-            <attribute name="action">app.loadFromFile</attribute>
-        </item>
-        <item>
-            <attribute name="label">Import from Vintage Story Model</attribute>
-            <attribute name="action">app.importFromVS</attribute>
-        </item>
-    </section>
-  </menu>
-</interface>
-`;
+    void initHamburger() {
+        hamburgerButton = new MenuButton();
+
+        SimpleAction setBGColorAction = new SimpleAction("setBGColor", null);
+        setBGColorAction.addOnActivate((variant, simpleaction) {
+            ColorChooserDialog colorChooser = new ColorChooserDialog("Select Background Color", parent);
+            scope(exit) colorChooser.destroy();
+            colorChooser.setUseAlpha(false);
+
+            colorChooser.run();
+
+            RGBA color;
+            colorChooser.getRgba(color);
+
+            CONFIG.backgroundColor[0] = color.red();
+            CONFIG.backgroundColor[1] = color.green();
+            CONFIG.backgroundColor[2] = color.blue();
+        });
+        parent.addAction(setBGColorAction);
+
+        SimpleAction toggleDarkModeAction = new SimpleAction("toggleDarkMode", null);
+        toggleDarkModeAction.addOnActivate((variant, simpleaction) {
+            CONFIG.darkMode = !CONFIG.darkMode;
+            parent.getSettings().setProperty("gtk-application-prefer-dark-theme", CONFIG.darkMode);
+            parent.getStyleContext().invalidate();
+        });
+        parent.addAction(toggleDarkModeAction);
+
+        Menu model = new Menu();
+        model.append("Set Background", "win.setBGColor");
+        model.append("Toggle Dark Mode", "win.toggleDarkMode");
+        model.append("Preferences", "win.preferences");
+        model.append("About", "win.about");
+        model.append("Quit", "win.quit");
+
+        hamburgerPopover = new Popover(hamburgerButton, model);
+        hamburgerButton.setPopover(hamburgerPopover);
+        hamburgerButton.setFocusOnClick(false);
+        Image hamburgerButtonHBG = new Image("open-menu-symbolic", IconSize.MENU);
+        hamburgerButton.add(hamburgerButtonHBG);
+
+        this.packEnd(hamburgerButton);
+
+    }
+}
