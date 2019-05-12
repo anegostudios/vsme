@@ -12,7 +12,7 @@ struct CameraConfig {
 
 struct Config {
     float[3] backgroundColor = [.5f, .5f, .5f];
-    bool darkMode;
+    bool darkMode = true;
     CameraConfig camera;
 }
 

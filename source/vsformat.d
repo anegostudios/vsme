@@ -6,6 +6,12 @@ public:
 /// Output JSON shape that vintage story can read
 struct JShape {
 public:
+    /// Width of texture
+    size_t textureWidth;
+
+    /// Height of texture
+    size_t textureHeight;
+
     /// The textures this shape has access to
     string[string] textures;
 
@@ -32,6 +38,9 @@ public:
 
     /// Dictionary of attached faces
     JFace[string] faces;
+
+    /// Child elements
+    JElement[] children;
 
     /// Origin of rotation for this element
     float[] rotationOrigin;

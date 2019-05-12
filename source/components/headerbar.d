@@ -72,7 +72,10 @@ public:
 
             GtkResponseType resp = cast(GtkResponseType)fileChooser.run();
             if (resp == GtkResponseType.OK) {
-                writeln(fileChooser.getFilename());
+                string file = fileChooser.getFilename();
+                writeln("FileOP - Load: ", file);
+                import scene.scene : loadFromVSMCFile;
+                loadFromVSMCFile(file);
 
                 return;
             }
