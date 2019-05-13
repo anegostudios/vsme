@@ -146,10 +146,10 @@ public:
 
         visibleRenderer.addOnToggled((path, widget) {
             TreeIter iter = pathToIter(path);
+            int id = getIndexOfIter(iter);
             if (CONFIG.ui.elementList.propergateDisable) {
                 propergateVisibility(iter, !nodeMapping[id].visible);
             } else {
-                int id = getIndexOfIter(iter);
                 setVisibility(iter, id, !nodeMapping[id].visible);
             }
         });
