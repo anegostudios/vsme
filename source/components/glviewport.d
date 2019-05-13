@@ -237,13 +237,12 @@ public:
         });
 
         StackSwitcher sw = new StackSwitcher();
-        sw.packStart(addNewObjectButton, true, false, 0);
-        sw.packEnd(deleteSelectedObjectButton, true, false, 0);
-        sw.setSizeRequest(128, 32);
+        sw.packStart(addNewObjectButton, true, true, 0);
+        sw.packEnd(deleteSelectedObjectButton, true, true, 0);
 
         controlBox = new VBox(false, 4);
-        controlBox.packStart(scrollbar, true, true, 4);
-        controlBox.packStart(sw, false, false, 4);
+        controlBox.packStart(scrollbar, true, true, 2);
+        controlBox.packStart(sw, false, false, 2);
         controlBox.setSizeRequest(256, 512+32);
 
         this.add(controlBox);

@@ -44,7 +44,7 @@ public:
 
         this.setShowCloseButton(true);
         this.setTitle(title);
-        this.setSubtitle("No Projects Open");
+        this.setSubtitle("Untitled Project");
 
         this.showAll();
     }
@@ -124,7 +124,10 @@ public:
             scope(exit) colorChooser.destroy();
             colorChooser.setUseAlpha(false);
 
-            colorChooser.run();
+            GtkResponseType resp = cast(GtkResponseType)colorChooser.run();
+
+            // Only change color if OK was pressed.
+            if (resp != GtkResponseType.OK) return;
 
             RGBA color;
             colorChooser.getRgba(color);
