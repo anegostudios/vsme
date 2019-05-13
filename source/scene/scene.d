@@ -106,6 +106,7 @@ Node nodeFromJElement(JElement jelement, Node parent = null) {
         n.rotation.z = jelement.rotationZ;
     }
 
+    n.visible = true;
     n.legacyTint = jelement.tintIndex;
 
     foreach(key, face; jelement.faces) {

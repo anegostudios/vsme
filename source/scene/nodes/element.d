@@ -102,6 +102,7 @@ public:
             child.render(camera);
         }
 
+        if (!visible) return;
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, null);
         glEnableVertexAttribArray(0);

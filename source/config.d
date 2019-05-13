@@ -13,10 +13,20 @@ struct CameraConfig {
     bool invertY = false;
 }
 
+struct ElementListConfig {
+    bool propergateDisable = true;
+}
+
+struct UIConfig {
+    ElementListConfig elementList;
+}
+
 struct Config {
     float[3] backgroundColor = [.5f, .5f, .5f];
     bool darkMode = true;
+    bool debugMode = false;
     CameraConfig camera;
+    UIConfig ui;
 }
 
 __gshared static Config CONFIG;

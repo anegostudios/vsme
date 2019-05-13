@@ -11,6 +11,23 @@ import gtk.Widget;
 import gobject.Signals;
 import gtk.ToggleButton;
 import gtk.StackSwitcher;
+import gtk.Popover;
+import gtk.TreeView;
+import gtk.Button;
+import gtk.ToggleButton;
+import gtk.Image;
+import gtk.TreeStore;
+import gtk.TreeIter;
+import gtk.TreePath;
+import gtk.CellRendererText;
+import gtk.CellRendererToggle;
+import gtk.CellRendererPixbuf;
+import gtk.CellRenderer;
+import gtk.TreeViewColumn;
+import scene.node;
+import scene.scene;
+import std.conv;
+import gobject.Value;
 
 public:
 
@@ -60,8 +77,8 @@ public:
         this.setValign(GtkAlign.START);
 
         this.setSizeRequest(32, 16);
-        this.setMarginStart(4);
-        this.setMarginTop(4);
+        this.setMarginStart(8);
+        this.setMarginTop(8);
 
         persp.setActive(CONFIG.camera.perspective);
         ortho.setActive(!CONFIG.camera.perspective);
@@ -76,11 +93,143 @@ public:
     }
 }
 
+enum EditorTreeIndexes : uint {
+    NameColumn = 0,
+    VisibleColumn = 1,
+    MapId = 2
+}
+
+class EditorNodeTree : Popover {
+private:
+    TreeStore treeStore;
+    CellRendererText nameRenderer;
+    CellRendererToggle visibleRenderer;
+    TreeViewColumn visibleColumn;
+    Node[] nodeMapping;
+
+    TreeIter pathToIter(string path) {
+        TreeIter iter = new TreeIter();
+        treeStore.getIter(iter, new TreePath(path));
+        return iter;
+    }
+
+    int getIndexOfIter(TreeIter iter) {
+        return treeStore.getValueInt(iter, EditorTreeIndexes.MapId);
+    }
+
+    int getIndexOfPath(string path) {
+        return getIndexOfIter(pathToIter(path));
+    }
+
+public:
+    TreeView nodeTree;
+
+    this(Widget parent) {
+        super(parent);
+
+        nodeTree = new TreeView();
+        treeStore = new TreeStore([GType.STRING, GType.BOOLEAN, GType.INT]);
+
+        nameRenderer = new CellRendererText();
+        nameRenderer.addOnEdited((path, text, widget) {
+            TreeIter iter = pathToIter(path);
+            int id = getIndexOfIter(iter);
+            this.setName(iter, id, text);
+        });
+        nameRenderer.setProperty("editable", true);
+        nodeTree.appendColumn(new TreeViewColumn("Name", nameRenderer, "text", EditorTreeIndexes.NameColumn));
+
+
+        visibleRenderer = new CellRendererToggle();
+        visibleRenderer.setProperty("radio", false);
+        visibleRenderer.setProperty("activatable", true);
+
+        visibleRenderer.addOnToggled((path, widget) {
+            TreeIter iter = pathToIter(path);
+            if (CONFIG.ui.elementList.propergateDisable) {
+                propergateVisibility(iter, !nodeMapping[id].visible);
+            } else {
+                int id = getIndexOfIter(iter);
+                setVisibility(iter, id, !nodeMapping[id].visible);
+            }
+        });
+
+        visibleColumn = new TreeViewColumn("Visible", visibleRenderer, "active", EditorTreeIndexes.VisibleColumn);
+        nodeTree.appendColumn(visibleColumn);
+
+        if (CONFIG.debugMode) nodeTree.appendColumn(new TreeViewColumn("IDs", nameRenderer, "text", EditorTreeIndexes.MapId));
+
+        nodeTree.setModel(treeStore);
+        nodeTree.setReorderable(true);
+
+        this.addOnShow((widget) {
+            nodeTree.showAll();
+        });
+
+        this.setModal(false);
+        this.setPosition(GtkPositionType.BOTTOM);
+        this.setConstrainTo(GtkPopoverConstraint.WINDOW);
+        this.add(nodeTree);
+    }
+
+    void propergateVisibility(TreeIter iter, bool visibility) {
+        if (treeStore.iterHasChild(iter)) {
+            TreeIter child;
+            if (child.getType() != GType.INVALID) {
+                treeStore.iterChildren(child, iter);
+                do {
+                    propergateVisibility(child, visibility);
+                } while (treeStore.iterNext(child) != false);
+            }
+        }
+
+        int id = getIndexOfIter(iter);
+        setVisibility(iter, id, visibility);
+    }
+
+    void setVisibility(TreeIter iter, int id, bool visibility) {
+        nodeMapping[id].visible = visibility;
+        treeStore.setValue(iter, EditorTreeIndexes.VisibleColumn, new Value(nodeMapping[id].visible));
+    }
+
+    void setName(TreeIter iter, int id, string newName) {
+        nodeMapping[id].name = newName;
+        treeStore.setValue(iter, EditorTreeIndexes.NameColumn, new Value(newName));
+    }
+
+    string getName(TreeIter iter, int id) {
+        return treeStore.getValueString(iter, id);
+    }
+
+    void updateTree() {
+        if (SCENE is null) return;
+        nodeMapping = [];
+
+        treeStore.clear();
+        TreeIter treeIterator = treeStore.createIter();
+        updateTreeAppend(SCENE.rootNode, treeIterator);
+        nodeTree.expandAll();
+    }
+
+    void updateTreeAppend(Node node, TreeIter iterator) {
+        treeStore.setValuesv(iterator, [EditorTreeIndexes.NameColumn, EditorTreeIndexes.VisibleColumn, EditorTreeIndexes.MapId], [new Value(node.name), new Value(node.visible), new Value(nodeMapping.length)]);
+        nodeMapping ~= node;
+        foreach(child; node.children) {
+            TreeIter iter = treeStore.createIter(iterator);
+            updateTreeAppend(child, iter);
+        }
+    }
+}
+
 class EditorViewport : Overlay {
 protected:
     GLArea viewport;
     EventBox evbox;
     EditorProjSwitch projectionSwitch;
+
+    // Node Tree
+    ToggleButton nodeTreeToggle;
+    EditorNodeTree nodeTree;
 
 public:
     ref GLArea getViewport() {
@@ -124,6 +273,27 @@ public:
 
         projectionSwitch = new EditorProjSwitch(this);
         this.addOverlay(projectionSwitch);
+
+
+        nodeTreeToggle = new ToggleButton();
+        nodeTreeToggle.setHalign(Align.END);
+        nodeTreeToggle.setValign(Align.START);
+        nodeTreeToggle.setMarginEnd(8);
+        nodeTreeToggle.setMarginTop(8);
+        Image nodeTreeToggleImg = new Image("open-menu-symbolic", IconSize.MENU);
+        nodeTreeToggle.add(nodeTreeToggleImg);
+        nodeTreeToggle.getStyleContext().addClass("suggested-action");
+
+        nodeTree = new EditorNodeTree(nodeTreeToggle);
+        nodeTreeToggle.addOnClicked((widget) {
+            if (nodeTreeToggle.getActive()) {
+                nodeTree.popup();
+                return;
+            }
+            nodeTree.popdown();
+        });
+
+        this.addOverlay(nodeTreeToggle);
         this.showAll();
     }
 

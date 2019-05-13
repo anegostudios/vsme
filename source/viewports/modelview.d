@@ -46,7 +46,7 @@ public:
                 this.projectionSwitch.persp.setActive(true);
             }
         }
-        return true;
+        return false;
     }
 
     override bool onButtonPressEvent(GdkEventButton* button) {
@@ -101,6 +101,8 @@ public:
                 Vector3 start = SCENE.rootNode.children[0].startPosition;
                 Vector3 end = SCENE.rootNode.children[0].endPosition;
                 camera.changeFocus(start+((end-start)/2), 50);
+
+                nodeTree.updateTree();
             }
             SCENE.update();
             SCENE.render(camera);
