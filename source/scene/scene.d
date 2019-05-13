@@ -8,6 +8,7 @@ import std.math;
 import utils.lineguide;
 import config;
 
+
 class Scene {
 private:
     bool shouldInit = true;
@@ -20,10 +21,28 @@ public:
     Node rootNode;
     string[string] textures;
 
+    this(bool setupBasic = false) {
+        rootNode = new RootNode();
+        if (setupBasic) {
+            rootNode.children ~= addNewElement();
+            this.focus = rootNode.children[0];
+        }
+    }
+
     ~this() {
         import core.memory : GC;
         destroy(rootNode);
         GC.collect();
+    }
+
+    ElementNode addNewElement(string name = "Cube", Node parent = null) {
+        ElementNode elmNode = new ElementNode(rootNode);
+        elmNode.startPosition = Vector3(0, 0, 0);
+        elmNode.endPosition = Vector3(16, 16, 16);
+        elmNode.name = name;
+        elmNode.visible = true;
+        elmNode.parent = parent !is null ? parent : rootNode;
+        return elmNode;
     }
 
     bool sceneReloaded() {
@@ -40,6 +59,9 @@ public:
     }
 
     void setCameraFocalPoint(Camera camera) {
+        if (focus is null) {
+            focus = this.rootNode;
+        }
         Vector3 start = this.focus.startPosition;
         Vector3 end = this.focus.endPosition;
         Vector3 center = start+((end-start)/2);
@@ -67,15 +89,25 @@ public:
         DIR_GUIDE.drawLine(Vector3(0, 0, 0), Vector3(0, 8, 0), Vector3(0, .8f, 0), Matrix4x4.identity(), 8f);
         DIR_GUIDE.drawLine(Vector3(0, 0, 0), Vector3(0, 0, 8), Vector3(0, 0, .8f), Matrix4x4.identity(), 8f);
         
+        // Make sure if the color is .
+        Vector3 bgVec = Vector3(CONFIG.backgroundColor);
+        Vector3 hfVec = Vector3(.5f);
+        Vector3 drColor = bgVec;
+        if (drColor > hfVec) {
+            drColor -= Vector3(0.1f);
+        } else {
+            drColor += Vector3(0.1f);
+        }
+
         if (CONFIG.render.showHelperGrid) {
             foreach(x; 0..17) {
                 foreach(z; 0..17) {
-                    DIR_GUIDE.drawSquare(Vector3((x-8)*16, 0, (z-8)*16), Vector3(((x-8)+1)*16, 0, ((z-8)+1)*16), Vector3(1f)-Vector3(CONFIG.backgroundColor), Matrix4x4.identity(), 1f);
+                    DIR_GUIDE.drawSquare(Vector3((x-8)*16, 0, (z-8)*16), Vector3(((x-8)+1)*16, 0, ((z-8)+1)*16), drColor, Matrix4x4.identity(), 1f);
                 }
             }
         }
         if (CONFIG.render.showBlockHeightHelper) {
-            DIR_GUIDE.drawSquare(Vector3(0, 16, 0), Vector3(16, 16, 16), Vector3(1f)-Vector3(CONFIG.backgroundColor), Matrix4x4.identity(), 1f);
+            DIR_GUIDE.drawSquare(Vector3(0, 16, 0), Vector3(16, 16, 16), drColor, Matrix4x4.identity(), 1f);
         }
         
         /// Disable depth buffer for post-rendering
@@ -84,7 +116,7 @@ public:
         if (CONFIG.render.showRotationCenter) {
             DIR_GUIDE.drawPoint(camera.origin, Vector3(0, 0, 0), 5f);
         }
-        
+
         rootNode.postRender(camera);
         /// TODO: make a Dot guide
         glEnable(GL_DEPTH);
@@ -102,7 +134,6 @@ void loadFromVSMCFile(string path) {
     JShape shape = shapeFromJson(readText(path));
     Scene scene = new Scene();
     
-    scene.rootNode = new RootNode();
     foreach(elem; shape.elements) {
         scene.rootNode.children ~= nodeFromJElement(elem);
     }

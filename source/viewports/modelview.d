@@ -35,6 +35,8 @@ public:
         camera.changeFocus(Vector3(0, 0, 0), 50);
         camera.rotationX = mathf.radians(25f);
         camera.rotationY = mathf.radians(90f);
+
+        SCENE = new Scene(true);
     }
     
     override bool onKeyPressEvent(GdkEventKey* key) {

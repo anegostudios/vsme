@@ -36,7 +36,7 @@ struct RenderConfig {
 }
 
 struct Config {
-    float[3] backgroundColor = [.5f, .5f, .5f];
+    float[3] backgroundColor = [0.125f, 0.141f, 0.149f];
     bool darkMode = true;
     bool debugMode = false;
     CameraConfig camera;

@@ -25,7 +25,7 @@ import gtk.CellRendererPixbuf;
 import gtk.CellRenderer;
 import gtk.TreeViewColumn;
 import gtk.ScrolledWindow;
-import gtk.HBox;
+import gtk.VBox;
 import scene.node;
 import scene.scene;
 import std.conv;
@@ -101,14 +101,19 @@ enum EditorTreeIndexes : uint {
     MapId = 2
 }
 
+private void doDestroy(T)(ref T item) {
+    destroy(item);
+}
+
 class EditorNodeTree : Popover {
 private:
-    HBox controlBox;
+    VBox controlBox;
 
     ScrolledWindow scrollbar;
 
     TreeStore treeStore;
     CellRendererText nameRenderer;
+    TreeViewColumn nameColumn;
     CellRendererToggle visibleRenderer;
     TreeViewColumn visibleColumn;
     Node[] nodeMapping;
@@ -135,6 +140,8 @@ private:
 
 public:
     TreeView nodeTree;
+    Button addNewObjectButton;
+    Button deleteSelectedObjectButton;
 
     this(Widget parent) {
         super(parent);
@@ -149,7 +156,9 @@ public:
             this.setName(iter, id, text);
         });
         nameRenderer.setProperty("editable", true);
-        nodeTree.appendColumn(new TreeViewColumn("Name", nameRenderer, "text", EditorTreeIndexes.NameColumn));
+        nameColumn = new TreeViewColumn("Name", nameRenderer, "text", EditorTreeIndexes.NameColumn);
+        nameColumn.setExpand(true);
+        nodeTree.appendColumn(nameColumn);
 
 
         visibleRenderer = new CellRendererToggle();
@@ -169,7 +178,6 @@ public:
         visibleColumn = new TreeViewColumn("👁️", visibleRenderer, "active", EditorTreeIndexes.VisibleColumn);
         visibleColumn.setAlignment(0.5f);
         nodeTree.appendColumn(visibleColumn);
-        visibleColumn.setFixedWidth(GtkTreeViewColumnSizing.AUTOSIZE);
 
         if (CONFIG.debugMode) nodeTree.appendColumn(new TreeViewColumn("IDs", nameRenderer, "text", EditorTreeIndexes.MapId));
 
@@ -194,11 +202,41 @@ public:
         scrollbar.setSizeRequest(256, 512);
         scrollbar.add(nodeTree);
 
-        controlBox = new HBox(true, 4);
+
+        addNewObjectButton = new Button("New Obj.");
+        addNewObjectButton.addOnClicked((widget) {
+            int id = getIndexOfIter(selectedItem());
+            auto elm = SCENE.addNewElement("Cube", nodeMapping[id]);
+            elm.init();
+            nodeMapping[id].children ~= elm;
+            SCENE.changeFocus(elm);
+            updateTree();
+        });
+
+        deleteSelectedObjectButton = new Button("Delete");
+        deleteSelectedObjectButton.addOnClicked((widget) {
+            int id = getIndexOfIter(selectedItem());
+            writefln("Attempting destruction of %s (from parent %s)...", nodeMapping[id].name, nodeMapping[id].parent.name);
+            SCENE.changeFocus(nodeMapping[id].parent);
+            nodeMapping[id].selfDestruct();
+            updateTree();
+        });
+
+        StackSwitcher sw = new StackSwitcher();
+        sw.packStart(addNewObjectButton, true, false, 0);
+        sw.packEnd(deleteSelectedObjectButton, true, false, 0);
+        sw.setSizeRequest(128, 32);
+
+        controlBox = new VBox(false, 4);
+        controlBox.packStart(scrollbar, true, true, 4);
+        controlBox.packStart(sw, false, false, 4);
         controlBox.setSizeRequest(256, 512+32);
-        controlBox.packStart(scrollbar, true, false, 4);
 
         this.add(controlBox);
+    }
+
+    TreeIter selectedItem() {
+        return nodeTree.getSelectedIter();
     }
 
     void propergateVisibility(TreeIter iter, bool visibility) {

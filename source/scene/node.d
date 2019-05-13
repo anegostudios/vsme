@@ -51,7 +51,7 @@ public:
     Node parent;
 
     /// Children attached to the node
-    Node[] children;
+    Node[] children = [];
 
     /// Legacy tint index.
     int legacyTint;
@@ -144,6 +144,43 @@ public:
             modelMatrix = parent.model * modelMatrix;
         }
         return modelMatrix;
+    }
+
+    void removeChild(Node child) {
+        if (children.length == 0) return;
+        int i = 0;
+        Node c = children[i];
+        
+        do {
+            if (c == child) {
+                writefln("Destroying %s...", child.name);
+                destroy(children[i]);
+                children[i] = null;
+                pruneChildren();
+                return;
+            }
+            if (i+1 < children.length) i++;
+            else c = null;
+        } while(c !is null);
+        writefln("WARNING: %s was not found in %s!...", child.name, this.name);
+    }
+
+    void selfDestruct() {
+        if (parent is null) return;
+        parent.removeChild(this);
+    }
+
+    void pruneChildren() {
+        for (size_t i = 0; i < children.length; i++) {
+            if (children[i] is null) {
+                writefln("Removing null offset @ %s.children[%d]", name, i);
+                children = children[0..i] ~ children[i+1..$];
+                i--;
+            }
+
+            // If we're out of range, we're done. 
+            if (i >= children.length) return;
+        }
     }
 
     /// Virtual post-rendering function
