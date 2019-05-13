@@ -32,6 +32,7 @@ struct UIConfig {
 struct RenderConfig {
     bool showHelperGrid = true;
     bool showBlockHeightHelper = false;
+    bool showRotationCenter = false;
 }
 
 struct Config {

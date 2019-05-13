@@ -81,7 +81,10 @@ public:
         /// Disable depth buffer for post-rendering
         glClear(GL_DEPTH_BUFFER_BIT);
         glDisable(GL_DEPTH);
-        DIR_GUIDE.drawPoint(camera.origin, Vector3(0, 0, 0), 5f);
+        if (CONFIG.render.showRotationCenter) {
+            DIR_GUIDE.drawPoint(camera.origin, Vector3(0, 0, 0), 5f);
+        }
+        
         rootNode.postRender(camera);
         /// TODO: make a Dot guide
         glEnable(GL_DEPTH);
