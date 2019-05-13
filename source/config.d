@@ -20,6 +20,8 @@ struct ElementListConfig {
 struct WindowConfig {
     int width;
     int height;
+    bool maximized;
+    bool fullscreen;
 }
 
 struct UIConfig {

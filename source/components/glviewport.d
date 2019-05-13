@@ -257,6 +257,7 @@ protected:
     // Node Tree
     ToggleButton nodeTreeToggle;
     EditorNodeTree nodeTree;
+    ApplicationWindow window;
 
 public:
     ref GLArea getViewport() {
@@ -266,6 +267,7 @@ public:
     int height;
 
     this(ApplicationWindow root) {
+        this.window = root;
         evbox = new EventBox();
         viewport = new GLArea();
         viewport.addOnRealize((widget) {

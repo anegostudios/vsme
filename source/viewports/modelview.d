@@ -47,6 +47,14 @@ public:
                 this.projectionSwitch.persp.setActive(true);
             }
         }
+        if (key.keyval == Keysyms.GDK_F12) {
+            CONFIG.ui.window.fullscreen = !CONFIG.ui.window.fullscreen;
+            if (CONFIG.ui.window.fullscreen) {
+                window.fullscreen();
+            } else {
+                window.unfullscreen();
+            }
+        }
         return false;
     }
 

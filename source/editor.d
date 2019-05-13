@@ -30,7 +30,16 @@ public:
         this.Window.addOnSizeAllocate((widget, allocation) {
             this.Window.getSize(CONFIG.ui.window.width, CONFIG.ui.window.height);
         });
+        
+        this.Window.addOnWindowState((GdkEventWindowState* ev, Widget widget) {
+            CONFIG.ui.window.maximized = (ev.newWindowState & WindowState.MAXIMIZED) != 0;
+            CONFIG.ui.window.fullscreen = (ev.newWindowState & WindowState.FULLSCREEN) != 0;
+            return false;
+        });
+
         this.Window.setDefaultSize(CONFIG.ui.window.width, CONFIG.ui.window.height);
+        if (CONFIG.ui.window.maximized) this.maximize();
+        if (CONFIG.ui.window.fullscreen) this.fullscreen();
 
         addStylesheet(import("style.scss"));
         this.getSettings().setProperty("gtk-application-prefer-dark-theme", CONFIG.darkMode);
