@@ -4,6 +4,8 @@ import gtk.Application;
 import components.headerbar;
 import viewports.modelview;
 import gtk.CssProvider;
+import gtk.Widget;
+import gdk.Event;
 import config;
 
 struct Vector3 {
@@ -24,6 +26,11 @@ public:
 
     this(Application app) {
         super(app);
+
+        this.Window.addOnSizeAllocate((widget, allocation) {
+            this.Window.getSize(CONFIG.ui.window.width, CONFIG.ui.window.height);
+        });
+        this.Window.setDefaultSize(CONFIG.ui.window.width, CONFIG.ui.window.height);
 
         addStylesheet(import("style.scss"));
         this.getSettings().setProperty("gtk-application-prefer-dark-theme", CONFIG.darkMode);

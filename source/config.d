@@ -17,8 +17,14 @@ struct ElementListConfig {
     bool propergateDisable = true;
 }
 
+struct WindowConfig {
+    int width;
+    int height;
+}
+
 struct UIConfig {
     ElementListConfig elementList;
+    WindowConfig window;
 }
 
 struct Config {
