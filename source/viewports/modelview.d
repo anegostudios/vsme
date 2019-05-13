@@ -24,6 +24,7 @@ public:
 
     this(ApplicationWindow window) {
         super(window);
+        this.setSizeRequest(1024, 768);
     }
 
     override void init() {
@@ -88,6 +89,11 @@ public:
     }
 
     override void update() {
+        if (SCENE !is null) {
+            if (SCENE.hasFocusChanged) {
+                SCENE.setCameraFocalPoint(camera);
+            }
+        }
         // camera.position = Vector3(20, 21, 20);
         // camera.lookAt(Vector3(0, 0, 0));
         camera.transformView();
@@ -98,10 +104,6 @@ public:
         if (SCENE !is null) {
             if (SCENE.sceneReloaded()) {
                 SCENE.setContext(this.viewport);
-                Vector3 start = SCENE.rootNode.children[0].startPosition;
-                Vector3 end = SCENE.rootNode.children[0].endPosition;
-                camera.changeFocus(start+((end-start)/2), 50);
-
                 nodeTree.updateTree();
             }
             SCENE.update();

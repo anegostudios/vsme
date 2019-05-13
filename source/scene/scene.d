@@ -13,6 +13,9 @@ private:
     GLArea ctx;
 
 public:
+    Node focus;
+    bool hasFocusChanged = true;
+
     Node rootNode;
     string[string] textures;
 
@@ -28,6 +31,20 @@ public:
 
     void setContext(GLArea area) {
         this.ctx = area;
+    }
+
+    void changeFocus(Node node) {
+        this.focus = node;
+        hasFocusChanged = true;
+    }
+
+    void setCameraFocalPoint(Camera camera) {
+        Vector3 start = this.focus.startPosition;
+        Vector3 end = this.focus.endPosition;
+        Vector3 center = start+((end-start)/2);
+        Matrix4x4 posVector = this.focus.center_model();
+        camera.changeFocus(Vector3(posVector[0][3], posVector[1][3], posVector[2][3]), camera.distance);
+        hasFocusChanged = false;
     }
 
     void update() {
@@ -76,6 +93,7 @@ void loadFromVSMCFile(string path) {
     }
 
     SCENE = scene;
+    SCENE.focus = scene.rootNode.children[0];
 
     writeln("Loaded scene!\n\n", scene);
 }

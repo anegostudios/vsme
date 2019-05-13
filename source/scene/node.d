@@ -118,6 +118,34 @@ public:
         return modelMatrix;
     }
 
+
+    Matrix4x4 center_model() {
+        Matrix4x4 rotationMatrix = Matrix4x4.identity();
+        rotationMatrix.rotatex(mathf.radians(rotation.x));
+        rotationMatrix.rotatey(mathf.radians(rotation.y));
+        rotationMatrix.rotatez(mathf.radians(rotation.z));
+
+        Vector3 halfSize = (endPosition-startPosition)/2;
+        
+        Matrix4x4 originMatrix = Matrix4x4.translation(origin);
+        Matrix4x4 minusOriginMatrix = Matrix4x4.translation(-origin);
+        Matrix4x4 startMatrix = Matrix4x4.translation(startPosition);
+        Matrix4x4 halfSizeMatrix = Matrix4x4.translation(halfSize);
+        Matrix4x4 minusHalfSizeMatrix = Matrix4x4.translation(-halfSize);
+
+        Matrix4x4 modelMatrix = Matrix4x4.identity();
+        if (originMatrix.isFinite) modelMatrix *= originMatrix;
+        if (rotationMatrix.isFinite) modelMatrix *= rotationMatrix;
+        if (halfSizeMatrix.isFinite) modelMatrix *= halfSizeMatrix;
+        if (minusOriginMatrix.isFinite) modelMatrix *= minusOriginMatrix;
+        if (startMatrix.isFinite) modelMatrix *= startMatrix;
+
+        if (parent !is null) {
+            modelMatrix = parent.model * modelMatrix;
+        }
+        return modelMatrix;
+    }
+
     /// Virtual post-rendering function
     void postRender(Camera camera) {
         foreach(child; children) {

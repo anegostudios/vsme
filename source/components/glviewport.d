@@ -24,6 +24,8 @@ import gtk.CellRendererToggle;
 import gtk.CellRendererPixbuf;
 import gtk.CellRenderer;
 import gtk.TreeViewColumn;
+import gtk.ScrolledWindow;
+import gtk.HBox;
 import scene.node;
 import scene.scene;
 import std.conv;
@@ -101,6 +103,10 @@ enum EditorTreeIndexes : uint {
 
 class EditorNodeTree : Popover {
 private:
+    HBox controlBox;
+
+    ScrolledWindow scrollbar;
+
     TreeStore treeStore;
     CellRendererText nameRenderer;
     CellRendererToggle visibleRenderer;
@@ -110,6 +116,12 @@ private:
     TreeIter pathToIter(string path) {
         TreeIter iter = new TreeIter();
         treeStore.getIter(iter, new TreePath(path));
+        return iter;
+    }
+
+    TreeIter pathToIter(TreePath path) {
+        TreeIter iter = new TreeIter();
+        treeStore.getIter(iter, path);
         return iter;
     }
 
@@ -162,14 +174,29 @@ public:
         nodeTree.setModel(treeStore);
         nodeTree.setReorderable(true);
 
+        nodeTree.setActivateOnSingleClick(true);
+        nodeTree.addOnRowActivated((path, collumn, view) {
+            int id = getIndexOfIter(pathToIter(path));
+            SCENE.changeFocus(nodeMapping[id]);
+        });
+
         this.addOnShow((widget) {
-            nodeTree.showAll();
+            controlBox.showAll();
         });
 
         this.setModal(false);
         this.setPosition(GtkPositionType.BOTTOM);
         this.setConstrainTo(GtkPopoverConstraint.WINDOW);
-        this.add(nodeTree);
+
+        scrollbar = new ScrolledWindow();
+        scrollbar.setSizeRequest(256, 512);
+        scrollbar.add(nodeTree);
+
+        controlBox = new HBox(true, 4);
+        controlBox.setSizeRequest(256, 512+32);
+        controlBox.packStart(scrollbar, true, false, 4);
+
+        this.add(controlBox);
     }
 
     void propergateVisibility(TreeIter iter, bool visibility) {
