@@ -209,7 +209,7 @@ public:
                 auto elm = SCENE.addNewElement("Cube", SCENE.rootNode);
                 elm.init();
                 SCENE.rootNode.children ~= elm;
-                
+
                 SCENE.changeFocus(elm);
                 updateTree(elm);
                 return;
@@ -301,14 +301,14 @@ public:
 
     void updateTreeAppend(Node node, TreeIter iterator, Node focused = null) {
         treeStore.setValuesv(iterator, [EditorTreeIndexes.NameColumn, EditorTreeIndexes.VisibleColumn, EditorTreeIndexes.MapId], [new Value(node.name), new Value(node.visible), new Value(nodeMapping.length)]);
-        if (focused == node) {
+        if (focused is node) {
             toFocusTree = iterator;
         }
         nodeMapping ~= node;
         
         foreach(child; node.children) {
             TreeIter iter = treeStore.createIter(iterator);
-            updateTreeAppend(child, iter);
+            updateTreeAppend(child, iter, focused);
         }
     }
 }
