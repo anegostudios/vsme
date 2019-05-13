@@ -166,8 +166,10 @@ public:
             }
         });
 
-        visibleColumn = new TreeViewColumn("Visible", visibleRenderer, "active", EditorTreeIndexes.VisibleColumn);
+        visibleColumn = new TreeViewColumn("👁️", visibleRenderer, "active", EditorTreeIndexes.VisibleColumn);
+        visibleColumn.setAlignment(0.5f);
         nodeTree.appendColumn(visibleColumn);
+        visibleColumn.setFixedWidth(GtkTreeViewColumnSizing.AUTOSIZE);
 
         if (CONFIG.debugMode) nodeTree.appendColumn(new TreeViewColumn("IDs", nameRenderer, "text", EditorTreeIndexes.MapId));
 

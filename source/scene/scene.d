@@ -6,6 +6,7 @@ import std.stdio;
 import gl.camera;
 import std.math;
 import utils.lineguide;
+import config;
 
 class Scene {
 private:
@@ -65,7 +66,18 @@ public:
         DIR_GUIDE.drawLine(Vector3(0, 0, 0), Vector3(8, 0, 0), Vector3(.8f, 0, 0), Matrix4x4.identity(), 8f);
         DIR_GUIDE.drawLine(Vector3(0, 0, 0), Vector3(0, 8, 0), Vector3(0, .8f, 0), Matrix4x4.identity(), 8f);
         DIR_GUIDE.drawLine(Vector3(0, 0, 0), Vector3(0, 0, 8), Vector3(0, 0, .8f), Matrix4x4.identity(), 8f);
-
+        
+        if (CONFIG.render.showHelperGrid) {
+            foreach(x; 0..17) {
+                foreach(z; 0..17) {
+                    DIR_GUIDE.drawSquare(Vector3((x-8)*16, 0, (z-8)*16), Vector3(((x-8)+1)*16, 0, ((z-8)+1)*16), Vector3(1f)-Vector3(CONFIG.backgroundColor), Matrix4x4.identity(), 1f);
+                }
+            }
+        }
+        if (CONFIG.render.showBlockHeightHelper) {
+            DIR_GUIDE.drawSquare(Vector3(0, 16, 0), Vector3(16, 16, 16), Vector3(1f)-Vector3(CONFIG.backgroundColor), Matrix4x4.identity(), 1f);
+        }
+        
         /// Disable depth buffer for post-rendering
         glClear(GL_DEPTH_BUFFER_BIT);
         glDisable(GL_DEPTH);

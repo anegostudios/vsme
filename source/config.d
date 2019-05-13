@@ -29,12 +29,18 @@ struct UIConfig {
     WindowConfig window;
 }
 
+struct RenderConfig {
+    bool showHelperGrid = true;
+    bool showBlockHeightHelper = false;
+}
+
 struct Config {
     float[3] backgroundColor = [.5f, .5f, .5f];
     bool darkMode = true;
     bool debugMode = false;
     CameraConfig camera;
     UIConfig ui;
+    RenderConfig render;
 }
 
 __gshared static Config CONFIG;
