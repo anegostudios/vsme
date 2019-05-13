@@ -53,8 +53,9 @@ public:
         /// Disable depth buffer for post-rendering
         glClear(GL_DEPTH_BUFFER_BIT);
         glDisable(GL_DEPTH);
+        DIR_GUIDE.drawPoint(camera.origin, Vector3(0, 0, 0), Matrix4x4.identity(), 5f);
         rootNode.postRender(camera);
-        DIR_GUIDE.drawLine(camera.origin, Vector3(camera.origin.x, camera.origin.y+0.1f, camera.origin.z), Vector3(0, 0, 0), Matrix4x4.identity(), 3f);
+        /// TODO: make a Dot guide
         glEnable(GL_DEPTH);
     }
 
