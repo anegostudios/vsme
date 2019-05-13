@@ -159,7 +159,10 @@ public:
                 pruneChildren();
                 return;
             }
-            if (i+1 < children.length) i++;
+            if (i+1 < children.length) { 
+                i++;
+                c = children[i];
+            }
             else c = null;
         } while(c !is null);
         writefln("WARNING: %s was not found in %s!...", child.name, this.name);

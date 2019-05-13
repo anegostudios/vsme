@@ -135,7 +135,7 @@ void loadFromVSMCFile(string path) {
     Scene scene = new Scene();
     
     foreach(elem; shape.elements) {
-        scene.rootNode.children ~= nodeFromJElement(elem);
+        scene.rootNode.children ~= nodeFromJElement(elem, scene.rootNode);
     }
 
     SCENE = scene;
