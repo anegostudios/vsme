@@ -205,21 +205,35 @@ public:
 
         addNewObjectButton = new Button("New Obj.");
         addNewObjectButton.addOnClicked((widget) {
+            if (selectedItem() is null) {
+                auto elm = SCENE.addNewElement("Cube", SCENE.rootNode);
+                elm.init();
+                SCENE.rootNode.children ~= elm;
+                
+                SCENE.changeFocus(elm);
+                updateTree(elm);
+                return;
+            }
             int id = getIndexOfIter(selectedItem());
             auto elm = SCENE.addNewElement("Cube", nodeMapping[id]);
             elm.init();
             nodeMapping[id].children ~= elm;
+
             SCENE.changeFocus(elm);
-            updateTree();
+            updateTree(elm);
         });
 
         deleteSelectedObjectButton = new Button("Delete");
         deleteSelectedObjectButton.addOnClicked((widget) {
+            if (selectedItem() is null) return;
+
             int id = getIndexOfIter(selectedItem());
-            writefln("Attempting destruction of %s (from parent %s)...", nodeMapping[id].name, nodeMapping[id].parent.name);
-            SCENE.changeFocus(nodeMapping[id].parent);
+            Node parent = nodeMapping[id].parent;
+            
             nodeMapping[id].selfDestruct();
-            updateTree();
+
+            SCENE.changeFocus(parent);
+            updateTree(parent);
         });
 
         StackSwitcher sw = new StackSwitcher();
@@ -268,19 +282,30 @@ public:
         return treeStore.getValueString(iter, id);
     }
 
-    void updateTree() {
+    private TreeIter toFocusTree;
+    void updateTree(Node focused = null) {
         if (SCENE is null) return;
         nodeMapping = [];
+        toFocusTree = null;
 
         treeStore.clear();
         TreeIter treeIterator = treeStore.createIter();
-        updateTreeAppend(SCENE.rootNode, treeIterator);
+        if (SCENE.rootNode.children.length == 0) return;
+        updateTreeAppend(SCENE.rootNode.children[0], treeIterator, focused);
         nodeTree.expandAll();
+
+        if (toFocusTree !is null) {
+            nodeTree.getSelection().selectIter(toFocusTree);
+        }
     }
 
-    void updateTreeAppend(Node node, TreeIter iterator) {
+    void updateTreeAppend(Node node, TreeIter iterator, Node focused = null) {
         treeStore.setValuesv(iterator, [EditorTreeIndexes.NameColumn, EditorTreeIndexes.VisibleColumn, EditorTreeIndexes.MapId], [new Value(node.name), new Value(node.visible), new Value(nodeMapping.length)]);
+        if (focused == node) {
+            toFocusTree = iterator;
+        }
         nodeMapping ~= node;
+        
         foreach(child; node.children) {
             TreeIter iter = treeStore.createIter(iterator);
             updateTreeAppend(child, iter);
