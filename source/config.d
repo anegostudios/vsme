@@ -16,6 +16,8 @@ import asdf;
 static import io = std.stdio;
 import std.file;
 
+enum VSME_TITLE = "Vintage Studio";
+
 struct CameraConfig {
     bool perspective = true;
     float fov = 90f;

@@ -27,7 +27,6 @@ struct Vector3 {
     float z;
 }
 
-enum VSME_TITLE = "VSME (Vintage Story Model Editor)";
 class EditorWindow : ApplicationWindow {
 private:
     CssProvider lightTheme;
