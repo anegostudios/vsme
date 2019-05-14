@@ -22,7 +22,7 @@ class RootNode : Node {
 public:
     this() {
         super(NodeType.RootNode);
-        this.name = "root";
+        this.name = "Scene";
         this.startPosition = Vector3(0, 0, 0);
         this.endPosition = Vector3(0, 0, 0);
     }

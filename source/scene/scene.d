@@ -67,6 +67,7 @@ public:
         ElementNode elmNode = new ElementNode(rootNode);
         elmNode.startPosition = Vector3(0, 0, 0);
         elmNode.endPosition = Vector3(16, 16, 16);
+        elmNode.origin = Vector3(8, 8, 8);
         elmNode.name = name;
         elmNode.visible = true;
         elmNode.parent = parent !is null ? parent : rootNode;

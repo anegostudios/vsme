@@ -242,12 +242,25 @@ public:
         deleteSelectedObjectButton.add(deleteSelectedObjectButtonImg);
         deleteSelectedObjectButton.getStyleContext().addClass("destructive-action");
         deleteSelectedObjectButton.addOnClicked((widget) {
+            import scene.nodes;
             if (selectedItem() is null) return;
 
             int id = getIndexOfIter(selectedItem());
+
+            // Don't allow deleting the root node.
+            if (is(typeof(nodeMapping[id]) : RootNode)) {
+                return;
+            }
+
             Node parent = nodeMapping[id].parent;
             
             nodeMapping[id].selfDestruct();
+
+            if (parent is null) {
+                SCENE.changeFocus(SCENE.rootNode);
+                updateTree(SCENE.rootNode);
+                return;
+            }
 
             SCENE.changeFocus(parent);
             updateTree(parent);
@@ -310,8 +323,7 @@ public:
 
         treeStore.clear();
         TreeIter treeIterator = treeStore.createIter();
-        if (SCENE.rootNode.children.length == 0) return;
-        updateTreeAppend(SCENE.rootNode.children[0], treeIterator, focused);
+        updateTreeAppend(SCENE.rootNode, treeIterator, focused);
         nodeTree.expandAll();
 
         if (toFocusTree !is null) {
