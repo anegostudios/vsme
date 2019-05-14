@@ -32,7 +32,11 @@ public:
     }
 
     override void updateBuffer() {
-        // There's no buffer in the root node
+        // There's no buffer in the root node, though make sure that the user doesn't move the root.
+        this.startPosition = Vector3(0, 0, 0);
+        this.endPosition = Vector3(0, 0, 0);
+        this.origin = Vector3(0, 0, 0);
+        this.rotation = Vector3(0, 0, 0);
     }
 
     override void render(Camera camera) {
