@@ -28,6 +28,7 @@ import gtk.ScrolledWindow;
 import gtk.SpinButton;
 import gtk.VBox;
 import gtk.HBox;
+import gtk.Label;
 import scene.node;
 import scene.scene;
 import std.conv;
@@ -474,9 +475,16 @@ public:
         });
 
         container = new VBox(false, 4);
+        container.packStart(new Label("Translation"), false, true, 4);
         container.packStart(position, false, false, 4);
+
+        container.packStart(new Label("Scale"), false, true, 4);
         container.packStart(size, false, false, 4);
+
+        container.packStart(new Label("Rotation"), false, true, 4);
         container.packStart(rotation, false, false, 4);
+
+        container.packStart(new Label("Rotation Origin"), false, true, 4);
         container.packStart(origin, false, false, 4);
 
         SCENE.addRefocusCallback(&refocus);
