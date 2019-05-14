@@ -92,8 +92,6 @@ public:
 
     override void updateBuffer() {
         verts = generateCube(Vector3(0, 0, 0), this.endPosition-this.startPosition);
-        writefln("Updating buffer for %s with %d tris...", name, cubeIndices.length/3);
-
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferSubData(GL_ARRAY_BUFFER, 0, verts.length*float.sizeof, verts.ptr);
     }

@@ -352,13 +352,32 @@ public:
         zButton = new SpinButton(int.min, int.max, 0.1);
         zButton.getStyleContext().addClass("spin-z");
 
+        xButton.setSnapToTicks(false);
+        yButton.setSnapToTicks(false);
+        zButton.setSnapToTicks(false);
+
         xButton.setValue(0);
         yButton.setValue(0);
         zButton.setValue(0);
 
+        xButton.setDigits(2);
+        yButton.setDigits(2);
+        zButton.setDigits(2);
+
+        xButton.setWidthChars(4);
+        yButton.setWidthChars(4);
+        zButton.setWidthChars(4);
+
         xButton.addOnValueChanged(&handleValueChange);
         yButton.addOnValueChanged(&handleValueChange);
         zButton.addOnValueChanged(&handleValueChange);
+
+        // TODO: implement so that modifying text always updates.
+        // import cairo.Context : Context;
+        // xButton.addOnDraw((Context ctx, Widget widget) { handleValueChange(xButton); return false; });
+        // yButton.addOnDraw((Context ctx, Widget widget) { handleValueChange(yButton); return false; });
+        // zButton.addOnDraw((Context ctx, Widget widget) { handleValueChange(zButton); return false; });
+
         this.packStart(xButton, false, false, 4);
         this.packStart(yButton, false, false, 4);
         this.packStart(zButton, false, false, 4);
@@ -434,16 +453,19 @@ public:
             if (isRefocusing) return;
             SCENE.focus.startPosition = position;
             SCENE.focus.endPosition = position+size.getValue();
+            SCENE.changeFocus(SCENE.focus);
         });
 
         size.addOnValueChanged((size) {
             if (isRefocusing) return;
             SCENE.focus.endPosition = SCENE.focus.startPosition+size;
+            SCENE.changeFocus(SCENE.focus);
         });
 
         rotation.addOnValueChanged((rotation) {
             if (isRefocusing) return;
             SCENE.focus.rotation = rotation;
+            SCENE.changeFocus(SCENE.focus);
         });
 
         origin.addOnValueChanged((origin) {

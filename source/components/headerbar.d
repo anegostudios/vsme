@@ -28,8 +28,10 @@ public:
     Popover newPopover;
 
     MenuButton loadButton;
-    MenuButton saveButton;
     Popover loadPopover;
+
+    MenuButton saveButton;
+    Popover savePopover;
 
     /// Hamburger Menu
     MenuButton hamburgerButton;
@@ -134,6 +136,45 @@ public:
     void initSave() {
         saveButton = new MenuButton();
 
+
+        SimpleAction saveAction = new SimpleAction("saveProject", null);
+        saveAction.addOnActivate((variant, simpleaction) {
+            if (SCENE.outputPath is null) {
+                FileChooserDialog fileChooser = new FileChooserDialog("Save Project...", parent, GtkFileChooserAction.SAVE, ["Save"], [GtkResponseType.OK]);
+                scope(exit) fileChooser.destroy();
+
+                GtkResponseType resp = cast(GtkResponseType)fileChooser.run();
+                if (resp != GtkResponseType.OK) return;
+        
+                SCENE.outputPath = fileChooser.getFilename();
+            }
+            exportToVSMCFile(SCENE.outputPath);
+            this.setSubtitle(SCENE.outputPath);
+        });
+        parent.addAction(saveAction);
+
+
+        SimpleAction saveAsAction = new SimpleAction("saveProjectAs", null);
+        saveAsAction.addOnActivate((variant, simpleaction) {
+            FileChooserDialog fileChooser = new FileChooserDialog("Save Project As...", parent, GtkFileChooserAction.SAVE, ["Save"], [GtkResponseType.OK]);
+            scope(exit) fileChooser.destroy();
+
+            GtkResponseType resp = cast(GtkResponseType)fileChooser.run();
+            if (resp != GtkResponseType.OK) return;
+    
+            SCENE.outputPath = fileChooser.getFilename();
+            exportToVSMCFile(SCENE.outputPath);
+            this.setSubtitle(SCENE.outputPath);
+        });
+        parent.addAction(saveAsAction);
+
+        Menu model = new Menu();
+        model.append("Save", "win.saveProject");
+        model.append("Save As...", "win.saveProjectAs");
+
+
+        savePopover = new Popover(saveButton, model);
+        saveButton.setPopover(savePopover);
         saveButton.setFocusOnClick(false);
         Image saveButtonHBG = new Image("document-save-symbolic", IconSize.MENU);
         saveButton.add(saveButtonHBG);

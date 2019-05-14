@@ -20,7 +20,7 @@ public:
 
     /// Converts this JShape in to a json object
     string toJson() {
-        return serializeToJson!JShape(this);
+        return serializeToJsonPretty(this);
     }
 }
 

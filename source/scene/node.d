@@ -204,9 +204,9 @@ public:
         }
 
         if (this is SCENE.focus) {
-            DIR_GUIDE.drawLine(Vector3(0, 0, 0), Vector3(2, 0, 0), Vector3(.8f, 0, 0), model, 4f);
-            DIR_GUIDE.drawLine(Vector3(0, 0, 0), Vector3(0, 2, 0), Vector3(0, .8f, 0), model, 4f);
-            DIR_GUIDE.drawLine(Vector3(0, 0, 0), Vector3(0, 0, 2), Vector3(0, 0, .8f), model, 4f);
+            DIR_GUIDE.drawLine(Vector3(0, 0, 0), Vector3(2, 0, 0), Vector3(.8f, 0, 0), center_model, 4f);
+            DIR_GUIDE.drawLine(Vector3(0, 0, 0), Vector3(0, 2, 0), Vector3(0, .8f, 0), center_model, 4f);
+            DIR_GUIDE.drawLine(Vector3(0, 0, 0), Vector3(0, 0, 2), Vector3(0, 0, .8f), center_model, 4f);
 
             DIR_GUIDE.drawPoint(this.origin, Vector3(0.976, 0.505, 0.164), model, 6f);
         }

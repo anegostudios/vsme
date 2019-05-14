@@ -26,6 +26,8 @@ private:
     }
 
 public:
+    string outputPath;
+
     Node focus;
     bool hasFocusChanged = true;
 
@@ -140,7 +142,7 @@ public:
         glClear(GL_DEPTH_BUFFER_BIT);
         glDisable(GL_DEPTH);
         if (CONFIG.render.showRotationCenter) {
-            DIR_GUIDE.drawPoint(camera.origin, Vector3(0, 0, 0), Matrix4x4.identity(), 5f);
+            DIR_GUIDE.drawPoint(camera.origin, Vector3(0, 0, 0), Matrix4x4.identity(), 8f);
         }
 
         rootNode.postRender(camera);
@@ -151,6 +153,43 @@ public:
     override string toString() {
         return "Scene:\n" ~ rootNode.toString(1);
     }
+}
+
+void exportToVSMCFile(string path) {
+    import fio = std.file;
+    JShape shape;
+    shape.textures = SCENE.textures;
+    shape.elements = jElementFromNode(SCENE.rootNode).children;
+    fio.write(path, shape.toJson());  
+}
+
+JElement jElementFromNode(Node node) {
+    JElement element;
+    foreach(child; node.children) {
+        element.children ~= jElementFromNode(child);
+    }
+    if (node.parent is null) return element;
+
+    element.name = node.name;
+    element.from = [node.startPosition.x, node.startPosition.y, node.startPosition.z];
+    element.to = [node.endPosition.x, node.endPosition.y, node.endPosition.z];
+
+    element.rotationOrigin = [node.origin.x, node.origin.y, node.origin.z];
+    element.rotationX = node.rotation.x;
+    element.rotationY = node.rotation.y;
+    element.rotationZ = node.rotation.z;
+    element.tintIndex = node.legacyTint;
+
+    if (is(node : ElementNode)) {
+        foreach(key, face; (cast(ElementNode)node).faces) {
+            JFace fc;
+            element.faces[key] = fc;
+            element.faces[key].texture = face.texture;
+            element.faces[key].uv = [face.uvStart.x, face.uvEnd.y, face.uvEnd.x, face.uvEnd.y];
+            element.faces[key].enabled = face.enabled;
+        }
+    }
+    return element;
 }
 
 void loadFromVSMCFile(string path) {
@@ -166,7 +205,7 @@ void loadFromVSMCFile(string path) {
 
     SCENE = scene;
     SCENE.changeFocus(scene.rootNode.children[0]);
-
+    SCENE.outputPath = path;
 
     SCENE.callLoadCallbacks();
     writeln("Loaded scene!\n\n", scene);
