@@ -399,6 +399,25 @@ public:
         this.showAll();
     }
 
+    void updateStyleContext() {
+        xButton.getStyleContext().removeClass("spin-x");
+        yButton.getStyleContext().removeClass("spin-y");
+        zButton.getStyleContext().removeClass("spin-z");
+        xButton.getStyleContext().removeClass("spin-x-dark");
+        yButton.getStyleContext().removeClass("spin-y-dark");
+        zButton.getStyleContext().removeClass("spin-z-dark");
+
+        if (CONFIG.darkMode) {
+            xButton.getStyleContext().addClass("spin-x-dark");
+            yButton.getStyleContext().addClass("spin-y-dark");
+            zButton.getStyleContext().addClass("spin-z-dark");
+        } else {
+            xButton.getStyleContext().addClass("spin-x");
+            yButton.getStyleContext().addClass("spin-y");
+            zButton.getStyleContext().addClass("spin-z");
+        }
+    }
+
     void addOnValueChanged(void delegate(Vector3) cb) {
         callbacks ~= cb;
     }
@@ -512,6 +531,10 @@ public:
     }
 
     void popUp(Vector2 position) {
+        this.position.updateStyleContext();
+        this.size.updateStyleContext();
+        this.origin.updateStyleContext();
+        this.rotation.updateStyleContext();
         this.setPosition(GtkPositionType.TOP);
         if (dockedTo !is null) {
             this.setPointingTo(new GdkRectangle(0, 0, 32, 32));
