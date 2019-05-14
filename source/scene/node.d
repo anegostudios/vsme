@@ -6,6 +6,7 @@ public import gl.camera;
 public import gtk.GLArea;
 import std.format;
 import std.stdio;
+import scene.scene;
 
 enum NodeType : ubyte {
     CorruptNode = 0,
@@ -94,7 +95,17 @@ public:
 
     abstract void updateBuffer();
 
-    abstract void render(Camera camera);
+    void render(Camera camera) {
+        if (SCENE.focus is this) {
+            Vector3 size = endPosition-startPosition;
+
+            DIR_GUIDE.drawSquare(Vector3(0, 0, 0), Vector3(size.x, 0, size.z), Vector3(.7, .7, 1f), model, 5f);
+            DIR_GUIDE.drawSquare(Vector3(0, 0, 0), Vector3(size.x, size.y, 0), Vector3(.7, .7, 1f), model, 5f);
+
+            DIR_GUIDE.drawSquare(Vector3(0, size.y, 0), Vector3(size.x, size.y, size.z), Vector3(.7, .7, 1f), model, 5f);
+            DIR_GUIDE.drawSquare(Vector3(0, 0, size.z), Vector3(size.x, size.y, size.z), Vector3(.7, .7, 1f), model, 5f);
+        }
+    }
 
     Matrix4x4 model() {
         Matrix4x4 rotationMatrix = Matrix4x4.identity();
@@ -190,6 +201,14 @@ public:
     void postRender(Camera camera) {
         foreach(child; children) {
             child.postRender(camera);
+        }
+
+        if (this is SCENE.focus) {
+            DIR_GUIDE.drawLine(Vector3(0, 0, 0), Vector3(2, 0, 0), Vector3(.8f, 0, 0), model, 4f);
+            DIR_GUIDE.drawLine(Vector3(0, 0, 0), Vector3(0, 2, 0), Vector3(0, .8f, 0), model, 4f);
+            DIR_GUIDE.drawLine(Vector3(0, 0, 0), Vector3(0, 0, 2), Vector3(0, 0, .8f), model, 4f);
+
+            DIR_GUIDE.drawPoint(this.origin, Vector3(0.976, 0.505, 0.164), model, 6f);
         }
     }
 

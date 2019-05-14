@@ -11,8 +11,19 @@ import config;
 
 class Scene {
 private:
+    alias callbackDelegate = void delegate();
     bool shouldInit = true;
     GLArea ctx;
+
+    static __gshared callbackDelegate[] loadCallbacks;
+    static __gshared callbackDelegate[] focusChangeCallbacks;
+
+    void callLoadCallbacks() {
+        if (loadCallbacks is null) return;
+        foreach(loadCallback; loadCallbacks) {
+            loadCallback();
+        }
+    }
 
 public:
     Node focus;
@@ -25,7 +36,9 @@ public:
         rootNode = new RootNode();
         if (setupBasic) {
             rootNode.children ~= addNewElement();
-            this.focus = rootNode.children[0];
+            this.changeFocus(rootNode.children[0]);
+            if (loadCallbacks is null) return;
+            callLoadCallbacks();
         }
     }
 
@@ -45,6 +58,14 @@ public:
         return elmNode;
     }
 
+    static void addLoadCallback(callbackDelegate callback) {
+        loadCallbacks ~= callback;
+    }
+
+    static void addRefocusCallback(callbackDelegate callback) {
+        focusChangeCallbacks ~= callback;
+    }
+
     bool sceneReloaded() {
         return shouldInit;
     }
@@ -56,11 +77,16 @@ public:
     void changeFocus(Node node) {
         this.focus = node;
         hasFocusChanged = true;
+
+        if (focusChangeCallbacks is null) return;
+        foreach(focusChangeCallback; focusChangeCallbacks) {
+            focusChangeCallback();
+        }
     }
 
     void setCameraFocalPoint(Camera camera) {
         if (focus is null) {
-            focus = this.rootNode;
+            changeFocus(this.rootNode);
         }
         Vector3 start = this.focus.startPosition;
         Vector3 end = this.focus.endPosition;
@@ -114,7 +140,7 @@ public:
         glClear(GL_DEPTH_BUFFER_BIT);
         glDisable(GL_DEPTH);
         if (CONFIG.render.showRotationCenter) {
-            DIR_GUIDE.drawPoint(camera.origin, Vector3(0, 0, 0), 5f);
+            DIR_GUIDE.drawPoint(camera.origin, Vector3(0, 0, 0), Matrix4x4.identity(), 5f);
         }
 
         rootNode.postRender(camera);
@@ -139,8 +165,10 @@ void loadFromVSMCFile(string path) {
     }
 
     SCENE = scene;
-    SCENE.focus = scene.rootNode.children[0];
+    SCENE.changeFocus(scene.rootNode.children[0]);
 
+
+    SCENE.callLoadCallbacks();
     writeln("Loaded scene!\n\n", scene);
 }
 

@@ -25,6 +25,7 @@ import gtk.CellRendererPixbuf;
 import gtk.CellRenderer;
 import gtk.TreeViewColumn;
 import gtk.ScrolledWindow;
+import gtk.SpinButton;
 import gtk.VBox;
 import gtk.HBox;
 import scene.node;
@@ -100,10 +101,6 @@ enum EditorTreeIndexes : uint {
     NameColumn = 0,
     VisibleColumn = 1,
     MapId = 2
-}
-
-private void doDestroy(T)(ref T item) {
-    destroy(item);
 }
 
 class EditorNodeTree : Popover {
@@ -324,6 +321,171 @@ public:
     }
 }
 
+class VectorCollection : HBox {
+private:
+    alias valueChangedCallbackType = void delegate(Vector3);
+
+    valueChangedCallbackType[] callbacks;
+
+    SpinButton xButton;
+    SpinButton yButton;
+    SpinButton zButton;
+
+    void handleValueChange(SpinButton widget) {
+        double x = xButton.getValue();
+        double y = yButton.getValue();
+        double z = zButton.getValue();
+        foreach (callback; callbacks) {
+            callback(Vector3(x, y, z));
+        }
+    }
+
+public:
+    this(int spacing) {
+        super(false, spacing);
+        xButton = new SpinButton(int.min, int.max, 0.1);
+        xButton.getStyleContext().addClass("spin-x");
+
+        yButton = new SpinButton(int.min, int.max, 0.1);
+        yButton.getStyleContext().addClass("spin-y");
+
+        zButton = new SpinButton(int.min, int.max, 0.1);
+        zButton.getStyleContext().addClass("spin-z");
+
+        xButton.setValue(0);
+        yButton.setValue(0);
+        zButton.setValue(0);
+
+        xButton.addOnValueChanged(&handleValueChange);
+        yButton.addOnValueChanged(&handleValueChange);
+        zButton.addOnValueChanged(&handleValueChange);
+        this.packStart(xButton, false, false, 4);
+        this.packStart(yButton, false, false, 4);
+        this.packStart(zButton, false, false, 4);
+
+        this.showAll();
+    }
+
+    void addOnValueChanged(void delegate(Vector3) cb) {
+        callbacks ~= cb;
+    }
+
+    Vector3 getValue() {
+        return Vector3(xButton.getValue(), yButton.getValue(), zButton.getValue());
+    }
+
+    void setValue(Vector3 value) {
+        xButton.setValue(value.x);
+        yButton.setValue(value.y);
+        zButton.setValue(value.z);
+    }
+}
+
+class ContextualPopover : Popover {
+private:
+    VBox container;
+    Widget parent;
+    Widget dockedTo;
+
+    bool isRefocusing = false;
+
+    void refocus() {
+        isRefocusing = true;
+        if (SCENE is null || SCENE.focus is null) return;
+        position.setValue(SCENE.focus.startPosition);
+        size.setValue(SCENE.focus.endPosition-SCENE.focus.startPosition);
+        rotation.setValue(SCENE.focus.rotation);
+        origin.setValue(SCENE.focus.origin);
+        isRefocusing = false;
+    }
+
+public:
+    VectorCollection position;
+    VectorCollection size;
+    VectorCollection rotation;
+    VectorCollection origin;
+
+    void dock(Widget dockedTo) {
+        this.dockedTo = dockedTo;
+        this.setRelativeTo(dockedTo);
+        this.setModal(false);
+    }
+
+    void unDock() {
+        this.dockedTo = null;
+        this.setModal(true);
+        this.setRelativeTo(parent);
+    }
+
+    bool docked() {
+        return (dockedTo !is null);
+    }
+
+    this(Widget parent) {
+        super(parent);
+        this.parent = parent;
+
+        position = new VectorCollection(4);
+        size = new VectorCollection(4);
+        rotation = new VectorCollection(4);
+        origin = new VectorCollection(4);
+
+        position.addOnValueChanged((position) {
+            if (isRefocusing) return;
+            SCENE.focus.startPosition = position;
+            SCENE.focus.endPosition = position+size.getValue();
+        });
+
+        size.addOnValueChanged((size) {
+            if (isRefocusing) return;
+            SCENE.focus.endPosition = SCENE.focus.startPosition+size;
+        });
+
+        rotation.addOnValueChanged((rotation) {
+            if (isRefocusing) return;
+            SCENE.focus.rotation = rotation;
+        });
+
+        origin.addOnValueChanged((origin) {
+            if (isRefocusing) return;
+            SCENE.focus.origin = origin;
+        });
+
+        container = new VBox(false, 4);
+        container.packStart(position, false, false, 4);
+        container.packStart(size, false, false, 4);
+        container.packStart(rotation, false, false, 4);
+        container.packStart(origin, false, false, 4);
+
+        SCENE.addRefocusCallback(&refocus);
+
+        this.addOnShow((widget) {
+            //refocus();
+            this.showAll();
+        });
+
+        this.setConstrainTo(GtkPopoverConstraint.WINDOW);
+        this.add(container);
+    }
+
+    void popUp(Vector2 position) {
+        this.setPosition(GtkPositionType.TOP);
+        if (dockedTo !is null) {
+            this.setPointingTo(new GdkRectangle(0, 0, 32, 32));
+            this.showAll();
+            return;
+        }
+        this.setPointingTo(new GdkRectangle(cast(int)position.x, cast(int)position.y, 2, 2));
+        this.popup();
+    }
+
+    void popDown() {
+        if (dockedTo !is null) hide();
+        else popdown();
+        unDock();
+    }
+}
+
 class EditorViewport : Overlay {
 protected:
     GLArea viewport;
@@ -334,6 +496,9 @@ protected:
     ToggleButton nodeTreeToggle;
     EditorNodeTree nodeTree;
     ApplicationWindow window;
+
+    ContextualPopover contextPopover;
+    ToggleButton contextToggle;
 
 public:
     ref GLArea getViewport() {
@@ -369,8 +534,6 @@ public:
         /// TODO: the logic should probably be moved elsewhere.
         root.addOnKeyPress((GdkEventKey* key, widget) => onKeyPressEvent(key));
         root.addOnKeyRelease((GdkEventKey* key, widget) => onKeyReleaseEvent(key));
-
-        evbox.addOnButtonPress((GdkEventButton* button, widget) => onButtonPressEvent(button));
         evbox.addOnButtonRelease((GdkEventButton* button, widget) => onButtonReleaseEvent(button));
         root.addOnScroll((GdkEventScroll* scroll, widget) => onScrollEvent(scroll));
         root.addOnMotionNotify((GdkEventMotion* motion, widget) => onMotionNotifyEvent(motion));
@@ -399,6 +562,41 @@ public:
         });
 
         this.addOverlay(nodeTreeToggle);
+
+        contextPopover = new ContextualPopover(viewport);
+        evbox.addOnButtonPress((GdkEventButton* button, widget) {
+            if (button.button == 3) {
+                if (!contextPopover.docked) {
+                    contextPopover.popUp(Vector2(button.x, button.y));
+                }
+            }
+            onButtonPressEvent(button);
+            return false;
+        });
+
+        contextToggle = new ToggleButton();
+        contextToggle.setHalign(Align.END);
+        contextToggle.setValign(Align.END);
+        contextToggle.setMarginEnd(8);
+        contextToggle.setMarginBottom(8);
+
+        Image contextToggleImg = new Image("go-up-symbolic", IconSize.MENU);
+        contextToggle.add(contextToggleImg);
+
+        contextToggle.getStyleContext().addClass("suggested-action");
+
+        contextToggle.addOnClicked((widget) {
+            if (contextToggle.getActive()) {
+                contextPopover.dock(contextToggle);
+                contextPopover.popUp(Vector2(0, 0));
+                return;
+            }
+            contextPopover.popDown();
+        });
+
+        this.addOverlay(contextToggle);
+
+
         this.showAll();
     }
 

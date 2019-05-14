@@ -41,7 +41,7 @@ public:
         color = LINE_SHADER.getUniform("color");
     }
 
-    public void drawPoint(Vector3 at, Vector3 color, float lineWidth = 1f) {
+    public void drawPoint(Vector3 at, Vector3 color, Matrix4x4 model, float lineWidth = 1f) {
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         verts = [
             at.x, at.y, at.z
@@ -52,7 +52,7 @@ public:
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, null);
         glEnableVertexAttribArray(0);
         LINE_SHADER.use();
-        LINE_SHADER.setUniform(this.mvpMatrix, camera.mvp);
+        LINE_SHADER.setUniform(this.mvpMatrix, camera.mvp*model);
         LINE_SHADER.setUniform(this.color, color);
         glDrawArrays(GL_POINTS, 0, 1);
         glDisableVertexAttribArray(0);

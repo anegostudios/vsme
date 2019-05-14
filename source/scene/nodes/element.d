@@ -2,6 +2,7 @@ module scene.nodes.element;
 import scene.node;
 import math;
 import std.stdio;
+import scene.scene;
 
 class Face {
     /// The texture bound to the face
@@ -98,6 +99,7 @@ public:
     }
 
     override void render(Camera camera) {
+        super.render(camera);
         foreach(child; children) {
             child.render(camera);
         }
@@ -114,7 +116,7 @@ public:
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
         BASIC_SHADER.use();
         BASIC_SHADER.setUniform(mvpMatrix, camera.mvp*model);
-        BASIC_SHADER.setUniform(color, 1.0, 1.0, 1.0);
+        BASIC_SHADER.setUniform(color, 1.0, 1.0, 1.0, 1.0);
         glDrawElements(GL_TRIANGLES, cast(int)cubeIndices.length, GL_UNSIGNED_INT, null);
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);

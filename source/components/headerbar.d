@@ -15,13 +15,18 @@ import gtk.ColorChooserDialog;
 import std.stdio;
 import gdk.RGBA;
 import config;
+import scene.scene;
+import utils;
 
 class EditorHeaderBar : HeaderBar {
 private:
     ApplicationWindow parent;
+
 public:
     /// Load Button
     MenuButton newButton;
+    Popover newPopover;
+
     MenuButton loadButton;
     MenuButton saveButton;
     Popover loadPopover;
@@ -52,10 +57,31 @@ public:
     void initNew() {
         newButton = new MenuButton();
 
+
+        SimpleAction newConfirmAction = new SimpleAction("confirmNew", null);
+        newConfirmAction.addOnActivate((variant, simpleaction) {
+            // Collect old scene
+            doDestroy(SCENE);
+
+            // New scene!
+            SCENE = new Scene(true);
+
+            this.setSubtitle("Untitled Project");
+        });
+        parent.addAction(newConfirmAction);
+
+        Menu model = new Menu();
+        Menu answer = new Menu();
+        answer.append("Create New Project", "win.confirmNew");
+        model.appendSection("Are you sure?", answer);
+
+        newPopover = new Popover(newButton, model);
+
         newButton.setFocusOnClick(false);
         Image newButtonHBG = new Image("document-new-symbolic", IconSize.MENU);
         newButton.add(newButtonHBG);
 
+        newButton.setPopover(newPopover);
         this.packStart(newButton);
     }
 

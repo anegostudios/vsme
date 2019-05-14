@@ -134,8 +134,16 @@ public:
         glUniform3f(id, x, y, z);
     }
 
+    void setUniform(GLuint id, float x, float y, float z, float w) {
+        glUniform4f(id, x, y, z, w);
+    }
+
     void setUniform(GLuint id, Matrix4x4 matrix) {
         glUniformMatrix4fv(id, 1, GL_TRUE, &matrix.matrix[0][0]);
+    }
+
+    void setUniform(GLuint id, Vector4 vec) {
+        setUniform(id, vec.x, vec.y, vec.z, vec.w);
     }
 
     void setUniform(GLuint id, Vector3 vec) {

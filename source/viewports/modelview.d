@@ -37,6 +37,9 @@ public:
         camera.rotationY = mathf.radians(90f);
 
         SCENE = new Scene(true);
+        // Refocus the scene on the first child (which is a cube)
+        // We do this so that the program doesn't get confused about what to focus on in the transform widget.
+        SCENE.changeFocus(SCENE.rootNode.children[0]);
     }
     
     override bool onKeyPressEvent(GdkEventKey* key) {
