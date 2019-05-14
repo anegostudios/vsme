@@ -91,11 +91,11 @@ public:
             camera.rotationX = refRotationX;
             camera.rotationY = refRotationY;
 
-            if (!CONFIG.camera.invertX) camera.rotationX  -= mathf.radians(referencePosition.y-motion.y);
-            else camera.rotationX += mathf.radians(referencePosition.y-motion.y);
+            if (!CONFIG.camera.invertX) camera.rotationX  -= mathf.radians((referencePosition.y-motion.y)/CONFIG.camera.cameraSlowFactor);
+            else camera.rotationX += mathf.radians((referencePosition.y-motion.y)/CONFIG.camera.cameraSlowFactor);
 
-            if (!CONFIG.camera.invertY) camera.rotationY -= mathf.radians(referencePosition.x-motion.x);
-            else camera.rotationY += mathf.radians(referencePosition.x-motion.x);
+            if (!CONFIG.camera.invertY) camera.rotationY -= mathf.radians((referencePosition.x-motion.x)/CONFIG.camera.cameraSlowFactor);
+            else camera.rotationY += mathf.radians((referencePosition.x-motion.x)/CONFIG.camera.cameraSlowFactor);
             return true;
         }
         return false;

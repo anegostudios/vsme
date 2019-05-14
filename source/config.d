@@ -11,6 +11,8 @@ struct CameraConfig {
 
     bool invertX = false;
     bool invertY = false;
+
+    float cameraSlowFactor = 4f;
 }
 
 struct ElementListConfig {
