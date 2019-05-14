@@ -26,6 +26,7 @@ import gtk.CellRenderer;
 import gtk.TreeViewColumn;
 import gtk.ScrolledWindow;
 import gtk.VBox;
+import gtk.HBox;
 import scene.node;
 import scene.scene;
 import std.conv;
@@ -203,7 +204,9 @@ public:
         scrollbar.add(nodeTree);
 
 
-        addNewObjectButton = new Button("New Obj.");
+        addNewObjectButton = new Button();
+        Image addNewObjectButtonImg = new Image("list-add-symbolic", IconSize.MENU);
+        addNewObjectButton.add(addNewObjectButtonImg);
         addNewObjectButton.addOnClicked((widget) {
             if (selectedItem() is null) {
                 auto elm = SCENE.addNewElement("Cube", SCENE.rootNode);
@@ -223,7 +226,10 @@ public:
             updateTree(elm);
         });
 
-        deleteSelectedObjectButton = new Button("Delete");
+        deleteSelectedObjectButton = new Button();
+        Image deleteSelectedObjectButtonImg = new Image("list-remove-symbolic", IconSize.MENU);
+        deleteSelectedObjectButton.add(deleteSelectedObjectButtonImg);
+        deleteSelectedObjectButton.getStyleContext().addClass("destructive-action");
         deleteSelectedObjectButton.addOnClicked((widget) {
             if (selectedItem() is null) return;
 
@@ -236,13 +242,17 @@ public:
             updateTree(parent);
         });
 
+        HBox hb = new HBox(false, 4);
+
         StackSwitcher sw = new StackSwitcher();
         sw.packStart(addNewObjectButton, true, true, 0);
         sw.packEnd(deleteSelectedObjectButton, true, true, 0);
 
-        controlBox = new VBox(false, 4);
-        controlBox.packStart(scrollbar, true, true, 2);
-        controlBox.packStart(sw, false, false, 2);
+        hb.packStart(sw, false, false, 2);
+
+        controlBox = new VBox(false, 2);
+        controlBox.packStart(scrollbar, true, true, 0);
+        controlBox.packStart(hb, false, false, 0);
         controlBox.setSizeRequest(256, 512+32);
 
         this.add(controlBox);
@@ -295,6 +305,8 @@ public:
 
         if (toFocusTree !is null) {
             nodeTree.getSelection().selectIter(toFocusTree);
+        } else {
+            nodeTree.getSelection().selectIter(treeIterator);
         }
     }
 
