@@ -33,7 +33,7 @@ public:
 
     float distance = DEFAULT_DIST;
     Quaternion rotation = Quaternion.identity;
-    Vector3 origin;
+    Vector3 origin, targetOrigin;
     
     Matrix4x4 view;
     Matrix4x4 projection;
@@ -42,7 +42,7 @@ public:
         this.parent = parent;
         this.view = Matrix4x4.identity();
         this.projection = Matrix4x4.identity();
-        this.origin = Vector3(0, 0, 0);
+        this.origin = this.targetOrigin = Vector3(0, 0, 0);
     }
 
     Matrix4x4 mvp() {
@@ -60,7 +60,7 @@ public:
     }
 
     void changeFocus(Vector3 focusItem, float distance) {
-        origin = focusItem;
+        move(focusItem, false);
         this.distance = distance;
     }
 
@@ -68,7 +68,8 @@ public:
         view = Matrix4x4.look_at(position, point, Vector3(0, 1, 0));
     }*/
 
-    void update() {
+    void update(double deltaTime) {
+        origin = (origin - targetOrigin) * pow(1e-4f, deltaTime) + targetOrigin;
         if (CONFIG.camera.perspective) {
             projection = Matrix4x4.perspective(cast(float)parent.width, cast(float)parent.height, CONFIG.camera.fov, CONFIG.camera.znear, CONFIG.camera.zfar);
         } else {
@@ -87,5 +88,15 @@ public:
             float h_d = (h/r)*distx;
             projection = Matrix4x4.orthographic(-w_d, w_d, -h_d, h_d, CONFIG.camera.znear, CONFIG.camera.zfar);
         }
+    }
+
+    void offset(Vector3 offset, bool instant = false) {
+        move(targetOrigin + offset, instant);
+    }
+
+    void move(Vector3 position, bool instant = false) {
+        targetOrigin = position;
+        if (instant)
+            origin = targetOrigin;
     }
 }
