@@ -62,6 +62,7 @@ public:
     /// Rotation of the node
     Vector3 rotation = Vector3(0, 0, 0);
     
+    /// Parent of node
     Node parent;
 
     /// Children attached to the node

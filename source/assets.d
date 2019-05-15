@@ -14,5 +14,8 @@
 module assets;
 import gl.shader;
 
+/// Basic shader meant for drawing cubes
 static __gshared ShaderProgram BASIC_SHADER;
+
+/// Line shader, meant for drawing lines and points
 static __gshared ShaderProgram LINE_SHADER;

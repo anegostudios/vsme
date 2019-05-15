@@ -21,19 +21,19 @@ import gtk.Widget;
 import gdk.Event;
 import config;
 
-struct Vector3 {
-    float x;
-    float y;
-    float z;
-}
-
+/++
+    The main application window.
++/
 class EditorWindow : ApplicationWindow {
 private:
     CssProvider lightTheme;
     CssProvider darkTheme;
 
 public:
+    /// The 3D modeling viewport.
     ModelingViewport viewport;
+
+    /// The header bar
     EditorHeaderBar headerBar;
 
     this(Application app) {
@@ -67,15 +67,15 @@ public:
         this.showAll();
     }
 
-    void addStylesheet(string code) {
+    /// Add stylesheet to screen
+    final void addStylesheet(string code) {
         this.getStyleContext().addProviderForScreen(this.getScreen(), styleFromString(code), STYLE_PROVIDER_PRIORITY_USER);
-    }
-
-    void switchToDarkMode() {
-
     }
 }
 
+/++
+    Returns a CSS provider from a string of css data.
++/
 CssProvider styleFromString(string styleSheet) {
     CssProvider provider = new CssProvider();
     provider.loadFromData(styleSheet);

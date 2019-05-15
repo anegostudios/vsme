@@ -35,41 +35,8 @@ class EditorHeaderBar : HeaderBar {
 private:
     ApplicationWindow parent;
 
-public:
-    /// Load Button
-    MenuButton newButton;
-    Popover newPopover;
 
-    MenuButton loadButton;
-    Popover loadPopover;
-
-    MenuButton saveButton;
-    Popover savePopover;
-
-    /// Hamburger Menu
-    MenuButton hamburgerButton;
-    Popover hamburgerPopover;
-
-
-    this(ApplicationWindow parent, string title) {
-        super();
-
-        this.parent = parent;
-
-        initNew();
-        initLoad();
-        initSave();
-
-        initHamburger();
-
-        this.setShowCloseButton(true);
-        this.setTitle(title);
-        this.setSubtitle("Untitled Project");
-
-        this.showAll();
-    }
-
-    void initNew() {
+    final void initNew() {
         newButton = new MenuButton();
 
 
@@ -100,7 +67,7 @@ public:
         this.packStart(newButton);
     }
 
-    void initLoad() {
+    final void initLoad() {
         loadButton = new MenuButton();
 
         SimpleAction fromProjectAction = new SimpleAction("openFromProject", null);
@@ -146,7 +113,7 @@ public:
         this.packStart(loadButton);
     }
 
-    void initSave() {
+    final void initSave() {
         saveButton = new MenuButton();
 
 
@@ -195,7 +162,7 @@ public:
         this.packStart(saveButton);
     }
 
-    void initHamburger() {
+    final void initHamburger() {
         hamburgerButton = new MenuButton();
 
         SimpleAction setBGColorAction = new SimpleAction("setBGColor", null);
@@ -274,5 +241,52 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
         this.packEnd(hamburgerButton);
 
+    }
+    
+public:
+    /// New Button
+    MenuButton newButton;
+
+    /// New Popover
+    Popover newPopover;
+
+
+    /// Load Button
+    MenuButton loadButton;
+
+    /// Load Popover
+    Popover loadPopover;
+
+
+    /// Save Button
+    MenuButton saveButton;
+
+    /// Save Popover
+    Popover savePopover;
+
+
+    /// Hamburger Menu Button
+    MenuButton hamburgerButton;
+
+    /// Hamburger Menu Popover
+    Popover hamburgerPopover;
+
+
+    this(ApplicationWindow parent, string title) {
+        super();
+
+        this.parent = parent;
+
+        initNew();
+        initLoad();
+        initSave();
+
+        initHamburger();
+
+        this.setShowCloseButton(true);
+        this.setTitle(title);
+        this.setSubtitle("Untitled Project");
+
+        this.showAll();
     }
 }

@@ -115,20 +115,30 @@ public:
             child.render(camera);
         }
 
+        // If the element is marked invisible, skip the OpenGL rendering calls
         if (!visible) return;
+
+        // Bind the main buffer for the shape
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, null);
         glEnableVertexAttribArray(0);
 
+        // Bind the buffer for the color
         glBindBuffer(GL_ARRAY_BUFFER, colorVBO);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, null);
         glEnableVertexAttribArray(1);
 
+        // Bind the IBO
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+
+        // Enable shader and draw the shape via the IBO.
         BASIC_SHADER.use();
         BASIC_SHADER.setUniform(mvpMatrix, camera.mvp*model);
         BASIC_SHADER.setUniform(color, 1.0, 1.0, 1.0, 1.0);
         glDrawElements(GL_TRIANGLES, cast(int)cubeIndices.length, GL_UNSIGNED_INT, null);
+
+        // Make sure we clean up the attribute array.
+        // Avoids weird rendering glitches.
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
     }

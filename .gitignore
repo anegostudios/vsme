@@ -14,4 +14,5 @@ vsme-test-*
 *.obj
 *.lst
 vsme
+vintage-studio
 config.json

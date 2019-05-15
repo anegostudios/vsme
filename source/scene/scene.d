@@ -269,7 +269,7 @@ Node nodeFromJElement(JElement jelement, Node parent = null) {
 }
 
 void loadFromVSMEProject(string path) {
-
+    // TODO: implement VSME/Vintage Studio format for extra features.
 }
 
 __gshared static Scene SCENE;

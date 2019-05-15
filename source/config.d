@@ -27,8 +27,11 @@ struct CameraConfig {
     bool invertX = false;
     bool invertY = false;
 
-    float cameraRotationSlowness = 400f;
-    float cameraMovementSlowness = 800f;
+    float rotationSlowness = 400f;
+    float movementSlowness = 800f;
+
+    bool smooth = true;
+    bool autoFocus = true;
 }
 
 struct ElementListConfig {

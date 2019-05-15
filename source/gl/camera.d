@@ -12,30 +12,46 @@
     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 module gl.camera;
-import math;
-import config;
 import components.glviewport;
+import config;
+import math;
 
+/// The modes the camera can be in
 enum CameraMode {
     ArcBall = 0,
     FreeCam = 1
 }
 
+/// The default distance of which the camera will be placed away from an object.
 enum DEFAULT_DIST = 5;
-enum DEFAULT_DIST_ORTHO = 50;
 
+/++
+    Camera implements an ArcBall camera for use in the application
+
+    It will eventually also have a free cam mode.
++/
 class Camera {
 private:
     EditorViewport parent;
+    Vector3 targetOrigin;
 
 public:
+    /// The camera mode
     CameraMode mode = CameraMode.ArcBall;
 
+    /// The distance from the origin/target
     float distance = DEFAULT_DIST;
+
+    /// The rotation of the camera based of origin
     Quaternion rotation = Quaternion.identity;
-    Vector3 origin, targetOrigin;
+
+    /// The origin of the camera
+    Vector3 origin;
     
+    /// The view matrix (what the camera sees)
     Matrix4x4 view;
+
+    /// The projection matrix (what the user sees)
     Matrix4x4 projection;
 
     this(EditorViewport parent) {
@@ -45,29 +61,29 @@ public:
         this.origin = this.targetOrigin = Vector3(0, 0, 0);
     }
 
+    /// Calculate an MVP matrix
     Matrix4x4 mvp() {
+        /// Model part is calculated in the NodeElement class.
         return projection * view;
     }
 
+    /// Handle the viewport transformation.
     void transformView() {
         if (this.distance < CONFIG.camera.znear) this.distance = CONFIG.camera.znear;
         Matrix4x4 positionMatrix = Matrix4x4.identity();
         positionMatrix *= Matrix4x4.translation(Vector3(0, 0, -distance));
         positionMatrix *= rotation.to_matrix!(4, 4);
         positionMatrix *= Matrix4x4.translation(-origin);
-        //positionMatrix *= rotation.to_matrix!(4, 4);
         view = positionMatrix;
     }
 
+    /// Switch the focus from one origin to another.
     void changeFocus(Vector3 focusItem, float distance) {
         move(focusItem, false);
         this.distance = distance;
     }
 
-    /*void lookAt(Vector3 point) {
-        view = Matrix4x4.look_at(position, point, Vector3(0, 1, 0));
-    }*/
-
+    /// Update the camera's matricies and position
     void update(double deltaTime) {
         origin = (origin - targetOrigin) * pow(1e-4f, deltaTime) + targetOrigin;
         if (CONFIG.camera.perspective) {
@@ -90,10 +106,22 @@ public:
         }
     }
 
+    /++
+        Offset the camera's origin by desired value.
+
+        If instant is false the camera will smoothly move over to that point,
+        Otherwise it'll instantly snap to that point.
+    +/
     void offset(Vector3 offset, bool instant = false) {
         move(targetOrigin + offset, instant);
     }
 
+    /++
+        Moves camera origin to a specific position in the world.
+
+        If instant is false the camera will smoothly move over to that point,
+        Otherwise it'll instantly snap to that point.
+    +/
     void move(Vector3 position, bool instant = false) {
         targetOrigin = position;
         if (instant)

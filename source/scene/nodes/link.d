@@ -15,6 +15,11 @@ module scene.nodes.link;
 import scene.node;
 import math;
 
+/++
+    A link node is a node which links 2 nodes together without outputting any visible elements.
+
+    This will be used for skeletal animation
++/
 class LinkNode : Node {
 public:
     this() {
