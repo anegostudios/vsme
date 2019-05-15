@@ -32,8 +32,7 @@ public:
     CameraMode mode = CameraMode.ArcBall;
 
     float distance = DEFAULT_DIST;
-    float rotationX = 0;
-    float rotationY = 0;
+    Quaternion rotation = Quaternion.identity;
     Vector3 origin;
     
     Matrix4x4 view;
@@ -54,8 +53,7 @@ public:
         if (this.distance < CONFIG.camera.znear) this.distance = CONFIG.camera.znear;
         Matrix4x4 positionMatrix = Matrix4x4.identity();
         positionMatrix *= Matrix4x4.translation(Vector3(0, 0, -distance));
-        positionMatrix *= Matrix4x4.xrotation(rotationX);
-        positionMatrix *= Matrix4x4.yrotation(rotationY);
+        positionMatrix *= rotation.to_matrix!(4, 4);
         positionMatrix *= Matrix4x4.translation(-origin);
         //positionMatrix *= rotation.to_matrix!(4, 4);
         view = positionMatrix;
