@@ -26,11 +26,10 @@ import scene.scene;
 
 class ModelingViewport : EditorViewport {
 public:
-    bool isMovingCamera;
+    bool isMovingCamera, isRotatingCamera;
 
     Vector2 referencePosition;
-    float refRotationX;
-    float refRotationY;
+    Quaternion refRotation;
 
     Camera camera;
     import std.stdio : writeln;
@@ -46,8 +45,7 @@ public:
 
         camera = new Camera(this);
         camera.changeFocus(Vector3(0, 0, 0), 50);
-        camera.rotationX = mathf.radians(25f);
-        camera.rotationY = mathf.radians(90f);
+        camera.rotation = Quaternion.axis_rotation(cradians!30, Vector3(1, 0, 0)) * Quaternion.axis_rotation(cradians!25, Vector3(0, 1, 0));
 
         SCENE = new Scene(true);
         // Refocus the scene on the first child (which is a cube)
@@ -77,11 +75,15 @@ public:
     }
 
     override bool onButtonPressEvent(GdkEventButton* button) {
-        if (!isMovingCamera && button.button == 2) {
+        if (!isRotatingCamera && button.button == 2) {
+            if ((button.state & GdkModifierType.SHIFT_MASK) == GdkModifierType.SHIFT_MASK) {
+                isMovingCamera = true;
+                refRotation = camera.rotation.inverse;
+            } else {
+                isRotatingCamera = true;
+                refRotation = camera.rotation;
+            }
             referencePosition = Vector2(button.x, button.y);
-            refRotationX = camera.rotationX;
-            refRotationY = camera.rotationY;
-            isMovingCamera = true;
             return true;
         }
         return false;
@@ -95,21 +97,24 @@ public:
     override bool onButtonReleaseEvent(GdkEventButton* button) {
         if (button.button == 2) {
             isMovingCamera = false;
+            isRotatingCamera = false;
         }
         return false;
     }
 
     override bool onMotionNotifyEvent(GdkEventMotion* motion) {
-        if (isMovingCamera) {
-            camera.rotationX = refRotationX;
-            camera.rotationY = refRotationY;
+        const Vector2 pos = Vector2(motion.x, motion.y);
+        if (isRotatingCamera) {
+            const Vector2 delta = (pos - referencePosition) * (1.0f / CONFIG.camera.cameraRotationSlowness);
 
-            if (!CONFIG.camera.invertX) camera.rotationX  -= mathf.radians((referencePosition.y-motion.y)/CONFIG.camera.cameraSlowFactor);
-            else camera.rotationX += mathf.radians((referencePosition.y-motion.y)/CONFIG.camera.cameraSlowFactor);
-
-            if (!CONFIG.camera.invertY) camera.rotationY -= mathf.radians((referencePosition.x-motion.x)/CONFIG.camera.cameraSlowFactor);
-            else camera.rotationY += mathf.radians((referencePosition.x-motion.x)/CONFIG.camera.cameraSlowFactor);
+            // locally rotate vertical (pitch), globally rotate horizontal (yaw)
+            camera.rotation = Quaternion.axis_rotation(delta.y, Vector3(1, 0, 0)) * refRotation
+                * Quaternion.axis_rotation(delta.x, Vector3(0, 1, 0));
             return true;
+        } else if (isMovingCamera) {
+            const Vector2 delta = (pos - referencePosition) * (camera.distance / CONFIG.camera.cameraMovementSlowness);
+            referencePosition = pos;
+            camera.origin -= refRotation * Vector3(delta.x, -delta.y, 0);
         }
         return false;
     }

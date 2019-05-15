@@ -14,6 +14,7 @@
 module math;
 public import linalg = gl3n.linalg;
 public import mathf = gl3n.math;
+public import gl3n.math : cradians, cdegrees;
 alias Matrix4x4 = linalg.Matrix!(float, 4, 4);
 alias Matrix3x3 = linalg.Matrix!(float, 3, 3);
 alias Vector4 = linalg.Vector!(float, 4);
