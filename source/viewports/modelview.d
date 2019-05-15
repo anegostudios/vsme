@@ -114,12 +114,12 @@ public:
         } else if (isMovingCamera) {
             const Vector2 delta = (pos - referencePosition) * (camera.distance / CONFIG.camera.cameraMovementSlowness);
             referencePosition = pos;
-            camera.origin -= refRotation * Vector3(delta.x, -delta.y, 0);
+            camera.offset(-(refRotation * Vector3(delta.x, -delta.y, 0)), true);
         }
         return false;
     }
 
-    override void update() {
+    override void update(double deltaTime) {
         if (SCENE !is null) {
             if (SCENE.hasFocusChanged) {
                 SCENE.setCameraFocalPoint(camera);
@@ -128,7 +128,7 @@ public:
         // camera.position = Vector3(20, 21, 20);
         // camera.lookAt(Vector3(0, 0, 0));
         camera.transformView();
-        camera.update();
+        camera.update(deltaTime);
     }
 
     override bool draw(GLContext context, GLArea area) {

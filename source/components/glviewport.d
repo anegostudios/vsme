@@ -12,42 +12,53 @@
     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 module components.glviewport;
-import gtk.GLArea;
-import gtk.EventBox;
-import gtk.Overlay;
+
 import bindbc.opengl;
-import gdk.GLContext : GLContext;
-import gtk.ApplicationWindow;
+
 import config;
-import std.stdio;
-import gtk.Widget;
+
+import core.time;
+
+import gdk.GLContext : GLContext;
+
 import gobject.Signals;
-import gtk.ToggleButton;
-import gtk.StackSwitcher;
-import gtk.Popover;
-import gtk.TreeView;
-import gtk.Button;
-import gtk.ToggleButton;
-import gtk.Image;
-import gtk.TreeStore;
-import gtk.TreeIter;
-import gtk.TreePath;
-import gtk.CellRendererText;
-import gtk.CellRendererToggle;
-import gtk.CellRendererPixbuf;
-import gtk.CellRenderer;
-import gtk.TreeViewColumn;
-import gtk.ScrolledWindow;
-import gtk.SpinButton;
-import gtk.VBox;
-import gtk.HBox;
-import gtk.Label;
-import scene.node;
-import scene.scene;
-import std.conv;
 import gobject.Value;
 
+import gtk.ApplicationWindow;
+import gtk.Button;
+import gtk.CellRenderer;
+import gtk.CellRendererPixbuf;
+import gtk.CellRendererText;
+import gtk.CellRendererToggle;
+import gtk.EventBox;
+import gtk.GLArea;
+import gtk.HBox;
+import gtk.Image;
+import gtk.Label;
+import gtk.Overlay;
+import gtk.Popover;
+import gtk.ScrolledWindow;
+import gtk.SpinButton;
+import gtk.StackSwitcher;
+import gtk.ToggleButton;
+import gtk.ToggleButton;
+import gtk.TreeIter;
+import gtk.TreePath;
+import gtk.TreeStore;
+import gtk.TreeView;
+import gtk.TreeViewColumn;
+import gtk.VBox;
+import gtk.Widget;
+
+import scene.node;
+import scene.scene;
+
+import std.conv;
+import std.stdio;
+
 public:
+
+alias FastMonoTime = MonoTimeImpl!(ClockType.coarse);
 
 class EditorProjSwitch : StackSwitcher {
 private:
@@ -704,16 +715,23 @@ public:
 
         // Present it
         viewport.addOnRender((context, area) {
+            static FastMonoTime lastTime;
+            auto now = FastMonoTime.currTime();
+            if (lastTime is FastMonoTime.init)
+                lastTime = now;
+            auto delta = (now - lastTime).total!"hnsecs" / 10_000_000.0;
+            lastTime = now;
+
             glClearColor(CONFIG.backgroundColor[0], CONFIG.backgroundColor[1], CONFIG.backgroundColor[2], 1f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            update();
+            update(delta);
             return draw(context, area);
         });
     }
 
     abstract void init();
 
-    abstract void update();
+    abstract void update(double deltaTime);
 
     abstract bool draw(GLContext context, GLArea area);
 
