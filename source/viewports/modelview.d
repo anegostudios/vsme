@@ -108,8 +108,9 @@ public:
             const Vector2 delta = (pos - referencePosition) * (1.0f / CONFIG.camera.cameraRotationSlowness);
 
             // locally rotate vertical (pitch), globally rotate horizontal (yaw)
-            camera.rotation = Quaternion.axis_rotation(delta.y, Vector3(1, 0, 0)) * refRotation
-                * Quaternion.axis_rotation(delta.x, Vector3(0, 1, 0));
+            camera.rotation =   Quaternion.axis_rotation(delta.y, Vector3(1, 0, 0)) 
+                                * refRotation
+                                * Quaternion.axis_rotation(delta.x, Vector3(0, 1, 0));
             return true;
         } else if (isMovingCamera) {
             const Vector2 delta = (pos - referencePosition) * (camera.distance / CONFIG.camera.cameraMovementSlowness);
