@@ -142,8 +142,8 @@ public:
             Node indexNode = nodeMapping[getIndexOfIter(model, iter)];
             Node parentNode = SCENE.rootNode;
 
-            // Don't allow dragging root node.
-            if (indexNode == SCENE.rootNode) {
+            // Don't allow dragging root node, nor placing anything over root node
+            if (indexNode == SCENE.rootNode || path.getDepth() == 1) {
                 updateTree(SCENE.focus);
                 return;
             }
@@ -151,14 +151,15 @@ public:
             // Non-destructively destroy the instance in the node tree
             indexNode.selfDestruct(false);
 
-            if (path.up()) {
+            if (path.getDepth() > 1 && path.up()) {
                 TreeIter parent = pathToIter(path);
                 parentNode = nodeMapping[getIndexOfIter(parent)];
             }
 
             parentNode.children ~= indexNode;
             indexNode.parent = parentNode;
-            updateTree(indexNode);
+
+            // TODO: Expand nodes
             return;
         });
 
