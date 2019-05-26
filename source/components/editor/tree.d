@@ -25,10 +25,12 @@ import gtk.StackSwitcher;
 import gtk.TreeIter;
 import gtk.TreePath;
 import gtk.TreeStore;
+import gtk.TreeModelIF;
 import gtk.TreeView;
 import gtk.TreeViewColumn;
 import gtk.VBox;
 import gtk.Widget;
+import gdk.DragContext;
 import scene.node;
 import scene.scene;
 
@@ -56,27 +58,46 @@ private:
     CellRendererToggle visibleRenderer;
     TreeViewColumn visibleColumn;
     Node[] nodeMapping;
+    Node lastRemoved;
 
     TreeIter toFocusTree;
 
+    bool isMoving;
+
     TreeIter pathToIter(string path) {
-        TreeIter iter = new TreeIter();
-        treeStore.getIter(iter, new TreePath(path));
-        return iter;
+        return pathToIter(treeStore, path);
     }
 
     TreeIter pathToIter(TreePath path) {
-        TreeIter iter = new TreeIter();
-        treeStore.getIter(iter, path);
-        return iter;
+        return pathToIter(treeStore, path);
     }
 
     int getIndexOfIter(TreeIter iter) {
-        return treeStore.getValueInt(iter, EditorTreeIndices.MapId);
+        return getIndexOfIter(treeStore, iter);
     }
 
     int getIndexOfPath(string path) {
-        return getIndexOfIter(pathToIter(path));
+        return getIndexOfPath(treeStore, path);
+    }
+
+    TreeIter pathToIter(TreeModelIF model, string path) {
+        TreeIter iter = new TreeIter();
+        model.getIter(iter, new TreePath(path));
+        return iter;
+    }
+
+    TreeIter pathToIter(TreeModelIF model, TreePath path) {
+        TreeIter iter = new TreeIter();
+        model.getIter(iter, path);
+        return iter;
+    }
+
+    int getIndexOfIter(TreeModelIF model, TreeIter iter) {
+        return model.getValueInt(iter, EditorTreeIndices.MapId);
+    }
+
+    int getIndexOfPath(TreeModelIF model, string path) {
+        return getIndexOfIter(model, pathToIter(path));
     }
 
     void updateTreeAppend(Node node, TreeIter iterator, Node focused = null) {
@@ -106,6 +127,40 @@ public:
 
         nodeTree = new TreeView();
         treeStore = new TreeStore([GType.STRING, GType.BOOLEAN, GType.INT]);
+
+        import std.stdio : writeln;
+        nodeTree.setReorderable(true);
+
+        nodeTree.addOnDragBegin((ctx, widget) {
+            isMoving = true;
+        });
+
+        treeStore.addOnRowChanged((TreePath path, TreeIter iter, model) {
+            if (!isMoving) return;
+            isMoving = false;
+            writeln("Node binding changed, updating tree and node structure...");
+            Node indexNode = nodeMapping[getIndexOfIter(model, iter)];
+            Node parentNode = SCENE.rootNode;
+
+            // Don't allow dragging root node.
+            if (indexNode == SCENE.rootNode) {
+                updateTree(SCENE.focus);
+                return;
+            }
+            
+            // Non-destructively destroy the instance in the node tree
+            indexNode.selfDestruct(false);
+
+            if (path.up()) {
+                TreeIter parent = pathToIter(path);
+                parentNode = nodeMapping[getIndexOfIter(parent)];
+            }
+
+            parentNode.children ~= indexNode;
+            indexNode.parent = parentNode;
+            updateTree(indexNode);
+            return;
+        });
 
         nameRenderer = new CellRendererText();
         nameRenderer.addOnEdited((path, text, widget) {
@@ -142,7 +197,7 @@ public:
         nodeTree.setModel(treeStore);
         nodeTree.setReorderable(true);
 
-        nodeTree.setActivateOnSingleClick(true);
+        nodeTree.setActivateOnSingleClick(false);
         nodeTree.addOnRowActivated((path, collumn, view) {
             int id = getIndexOfIter(pathToIter(path));
             SCENE.changeFocus(nodeMapping[id]);
@@ -262,8 +317,8 @@ public:
     }
 
     /// Returns the name of the element the TreeIter and id point to.
-    string getName(TreeIter iter, int id) {
-        return treeStore.getValueString(iter, id);
+    string getName(TreeIter iter) {
+        return treeStore.getValueString(iter, EditorTreeIndices.NameColumn);
     }
 
     /// Update the tree structure.

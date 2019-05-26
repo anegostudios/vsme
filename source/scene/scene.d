@@ -165,7 +165,7 @@ public:
     }
 
     override string toString() {
-        return "Scene:\n" ~ rootNode.toString(1);
+        return "Scene:\n" ~ rootNode.toFmtString(1);
     }
 }
 

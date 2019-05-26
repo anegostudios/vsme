@@ -17,9 +17,11 @@ public import assets;
 public import bindbc.opengl;
 public import gl.camera;
 public import gtk.GLArea;
+public import std.container.dlist;
 import std.format;
 import std.stdio;
 import scene.scene;
+import containers.list;
 
 enum NodeType : ubyte {
     CorruptNode = 0,
@@ -66,7 +68,8 @@ public:
     Node parent;
 
     /// Children attached to the node
-    Node[] children = [];
+    //Node[] children = [];
+    List!Node children;
 
     /// Legacy tint index.
     int legacyTint;
@@ -171,15 +174,15 @@ public:
         return modelMatrix;
     }
 
-    void removeChild(Node child) {
-        if (children.length == 0) return;
+    void removeChild(Node child, bool destructive = true) {
+        /*if (children.length == 0) return;
         int i = 0;
         Node c = children[i];
         
         do {
             if (c == child) {
                 writefln("Destroying %s...", child.name);
-                destroy(children[i]);
+                if (destructive) destroy(children[i]);
                 children[i] = null;
                 pruneChildren();
                 return;
@@ -190,16 +193,18 @@ public:
             }
             else c = null;
         } while(c !is null);
-        writefln("WARNING: %s was not found in %s!...", child.name, this.name);
+        writefln("WARNING: %s was not found in %s!...", child.name, this.name);*/
+        children.remove(child);
+        if (destructive) destroy(child);
     }
 
-    void selfDestruct() {
+    void selfDestruct(bool destructive = true) {
         if (parent is null) return;
-        parent.removeChild(this);
+        parent.removeChild(this, destructive);
     }
 
     void pruneChildren() {
-        for (size_t i = 0; i < children.length; i++) {
+        /*for (size_t i = 0; i < children.length; i++) {
             if (children[i] is null) {
                 writefln("Removing null offset @ %s.children[%d]", name, i);
                 children = children[0..i] ~ children[i+1..$];
@@ -208,7 +213,7 @@ public:
 
             // If we're out of range, we're done. 
             if (i >= children.length) return;
-        }
+        }*/
     }
 
     /// Virtual post-rendering function
@@ -226,10 +231,10 @@ public:
         }
     }
 
-    string toString(size_t index) {
+    string toFmtString(size_t index) {
         string children = "";
         foreach(child; this.children) {
-            children ~= child.toString(index+2);
+            children ~= child.toFmtString(index+2);
         }
         string startPosText = "%s> start: %s\n".format(tabIndexToString(index+1), startPosition);
         string endPosText = "%s> end:   %s\n".format(tabIndexToString(index+1), endPosition);
