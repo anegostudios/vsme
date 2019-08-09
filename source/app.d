@@ -14,6 +14,7 @@
 import std.stdio;
 import gtk.ApplicationWindow;
 import gtk.Application;
+import gio.Application : GioApplication = Application;
 import editor;
 import config;
 
